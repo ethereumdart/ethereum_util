@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:buffer/buffer.dart';
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' show ListEquality;
 import 'package:convert/convert.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ethereum_util/src/bytes.dart';
