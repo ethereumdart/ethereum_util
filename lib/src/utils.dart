@@ -2,6 +2,7 @@ import 'dart:convert' show utf8;
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
+import 'package:pointycastle/src/utils.dart' as p_utils;
 import 'package:quiver/check.dart';
 
 bool isHexPrefixed(String str) {
@@ -117,4 +118,12 @@ bool isHexString(String value, {int length = 0}) {
   }
 
   return true;
+}
+
+BigInt decodeBigInt(List<int> bytes) {
+  return p_utils.decodeBigInt(bytes);
+}
+
+Uint8List encodeBigInt(BigInt input) {
+  return Uint8List.fromList(p_utils.encodeBigInt(input));
 }
