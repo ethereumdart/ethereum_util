@@ -1,6 +1,6 @@
 name: ethereum_util
 description: a collection of utility functions for Ethereum
-version: 1.0.0
+version: 1.0.1
 author: Peter Chung <touhonoob@gmail.com>
 homepage: https://github.com/ethereumdart/ethereum_util
 
@@ -14,6 +14,8 @@ dependencies:
   pointycastle: ^1.0.1
   buffer: ^1.0.6
   equatable: ^0.2.3
+  collection: ^1.14.11
 
 dev_dependencies:
   test: ^1.6.2
+  path: ^1.6.2

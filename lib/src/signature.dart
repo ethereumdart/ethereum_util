@@ -71,7 +71,8 @@ Uint8List publicKeyToAddress(Uint8List publicKey) {
 }
 
 /// Signs the hashed data in [message] using the given private key.
-ECDSASignature sign(Uint8List message, Uint8List privateKey, {int chainId = null}) {
+ECDSASignature sign(Uint8List message, Uint8List privateKey,
+    {int chainId = null}) {
   final digest = SHA256Digest();
   final signer = ECDSASigner(null, HMac(digest, 64));
   final key = ECPrivateKey(decodeBigInt(privateKey), params);
@@ -106,7 +107,8 @@ ECDSASignature sign(Uint8List message, Uint8List privateKey, {int chainId = null
   }
 
   if (recoveryId == -1) {
-    throw Exception('Could not construct a recoverable key. This should never happen');
+    throw Exception(
+        'Could not construct a recoverable key. This should never happen');
   }
 
   return ECDSASignature(
@@ -116,9 +118,12 @@ ECDSASignature sign(Uint8List message, Uint8List privateKey, {int chainId = null
   );
 }
 
-bool isValidSignature(BigInt r, BigInt s, int v, {bool homesteadOrLater = true, int chainId = null}) {
-  var SECP256K1_N_DIV_2 = decodeBigInt(hex.decode('7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0'));
-  var SECP256K1_N = decodeBigInt(hex.decode('fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'));
+bool isValidSignature(BigInt r, BigInt s, int v,
+    {bool homesteadOrLater = true, int chainId = null}) {
+  var SECP256K1_N_DIV_2 = decodeBigInt(hex.decode(
+      '7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0'));
+  var SECP256K1_N = decodeBigInt(hex.decode(
+      'fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141'));
 
   if (encodeBigInt(r).length != 32 || encodeBigInt(s).length != 32) {
     return false;
@@ -128,7 +133,10 @@ bool isValidSignature(BigInt r, BigInt s, int v, {bool homesteadOrLater = true, 
     return false;
   }
 
-  if (r == BigInt.zero || r > SECP256K1_N || s == BigInt.zero || s > SECP256K1_N) {
+  if (r == BigInt.zero ||
+      r > SECP256K1_N ||
+      s == BigInt.zero ||
+      s > SECP256K1_N) {
     return false;
   }
 
@@ -139,7 +147,8 @@ bool isValidSignature(BigInt r, BigInt s, int v, {bool homesteadOrLater = true, 
   return true;
 }
 
-Uint8List recoverPublicKeyFromSignature(ECDSASignature sig, Uint8List message, {int chainId = null}) {
+Uint8List recoverPublicKeyFromSignature(ECDSASignature sig, Uint8List message,
+    {int chainId = null}) {
   int recoveryId = _calculateSigRecovery(sig.v, chainId: chainId);
   if (!_isValidSigRecovery(recoveryId)) {
     throw ArgumentError("invalid signature v value");
@@ -152,13 +161,16 @@ Uint8List recoverPublicKeyFromSignature(ECDSASignature sig, Uint8List message, {
   return _recoverPublicKeyFromSignature(recoveryId, sig.r, sig.s, message);
 }
 
-Uint8List _recoverPublicKeyFromSignature(int recId, BigInt r, BigInt s, Uint8List message) {
+Uint8List _recoverPublicKeyFromSignature(
+    int recId, BigInt r, BigInt s, Uint8List message) {
   final n = params.n;
   final i = BigInt.from(recId ~/ 2);
   final x = r + (i * n);
 
   //Parameter q of curve
-  final prime = BigInt.parse('fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f', radix: 16);
+  final prime = BigInt.parse(
+      'fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f',
+      radix: 16);
   if (x.compareTo(prime) >= 0) return null;
 
   final R = _decompressKey(x, (recId & 1) == 1, params.curve);
@@ -218,7 +230,8 @@ ECPoint _decompressKey(BigInt xBN, bool yBit, ECCurve c) {
 /// used to produce the signature.
 ///
 Uint8List hashPersonalMessage(dynamic message) {
-  var prefix = toBuffer("\u0019Ethereum Signed Message:\n${message.length.toString()}");
+  var prefix =
+      toBuffer("\u0019Ethereum Signed Message:\n${message.length.toString()}");
   var bytesBuffer = BytesBuffer();
   bytesBuffer.add(prefix);
   bytesBuffer.add(message);

@@ -68,7 +68,8 @@ bool arrayContainsArray(List superset, List subset, {bool some: false}) {
 String toUtf8(String hexString) {
   checkNotNull(hexString);
 
-  var bufferValue = hex.decode(padToEven(stripHexPrefix(hexString).replaceAll(RegExp('^0+|0+\$'), '')));
+  var bufferValue = hex.decode(
+      padToEven(stripHexPrefix(hexString).replaceAll(RegExp('^0+|0+\$'), '')));
 
   return utf8.decode(bufferValue);
 }

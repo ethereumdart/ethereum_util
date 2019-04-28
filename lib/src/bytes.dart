@@ -74,7 +74,8 @@ Uint8List toBuffer(v) {
       v = Uint8List.fromList(v);
     } else if (v is String) {
       if (utils.isHexString(v)) {
-        v = Uint8List.fromList(hex.decode(utils.padToEven(utils.stripHexPrefix(v))));
+        v = Uint8List.fromList(
+            hex.decode(utils.padToEven(utils.stripHexPrefix(v))));
       } else {
         v = Uint8List.fromList(utf8.encode(v));
       }
