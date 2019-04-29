@@ -2,9 +2,9 @@ import 'dart:convert' show utf8;
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
+import 'package:ethereum_util/ethereum_util.dart';
 import 'package:ethereum_util/src/utils.dart'
     show intToBuffer, isHexString, padToEven, stripHexPrefix;
-import 'package:pointycastle/src/utils.dart' as p_utils;
 
 //Copy and pasted from the rlp nodejs library, translated to dart on a
 //best-effort basis.
@@ -71,7 +71,7 @@ Uint8List _toBuffer(dynamic data) {
   } else if (data is BigInt) {
     if (data == BigInt.zero) return Uint8List(0);
 
-    return Uint8List.fromList(p_utils.encodeBigInt(data));
+    return Uint8List.fromList(encodeBigInt(data));
   } else if (data is List<int>) {
     return Uint8List.fromList(data);
   }

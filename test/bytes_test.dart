@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
 import 'package:ethereum_util/src/bytes.dart' as bytes;
+import 'package:ethereum_util/src/bytes.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -9,7 +10,8 @@ void main() {
     group('zeros', () {
       test('should produce lots of 0s', () {
         var z60 = bytes.zeros(30);
-        const zs60 = '000000000000000000000000000000000000000000000000000000000000';
+        const zs60 =
+            '000000000000000000000000000000000000000000000000000000000000';
         expect(hex.encode(z60), zs60);
       });
     });
@@ -107,10 +109,56 @@ void main() {
       });
     });
 
-    group('hex prefix', () {
+    group('fromSigned', () {
+      test('should convert an unsigned (negative) buffer to a singed number',
+          () {
+        const neg =
+            '-452312848583266388373324160190187140051835877600158453279131187530910662656';
+        var buf = Uint8List(32);
+        buf.fillRange(0, 32, 0);
+        buf[0] = 255;
+
+        expect(fromSigned(buf).toString(), neg);
+      });
+      test('should convert an unsigned (postestive) buffer to a singed number',
+          () {
+        const neg =
+            '452312848583266388373324160190187140051835877600158453279131187530910662656';
+        var buf = Uint8List(32);
+        buf.fillRange(0, 32, 0);
+        buf[0] = 1;
+
+        expect(fromSigned(buf).toString(), neg);
+      });
+    });
+
+    group('toUnsigned', () {
+      test('should convert a signed (negative) number to unsigned', () {
+        const neg =
+            '-452312848583266388373324160190187140051835877600158453279131187530910662656';
+        const encoded =
+            'ff00000000000000000000000000000000000000000000000000000000000000';
+        var num = BigInt.parse(neg, radix: 10);
+
+        expect(hex.encode(toUnsigned(num)), encoded);
+      });
+
+      test('should convert a signed (postestive) number to unsigned', () {
+        const neg =
+            '452312848583266388373324160190187140051835877600158453279131187530910662656';
+        const encoded =
+            '0100000000000000000000000000000000000000000000000000000000000000';
+        var num = BigInt.parse(neg, radix: 10);
+
+        expect(hex.encode(toUnsigned(num)), encoded);
+      });
+    });
+
+    group('addHexPrefix', () {
       const string = 'd658a4b8247c14868f3c512fa5cbb6e458e4a989';
       test('should add', () {
-        expect(bytes.addHexPrefix(string), '0xd658a4b8247c14868f3c512fa5cbb6e458e4a989');
+        expect(bytes.addHexPrefix(string),
+            '0xd658a4b8247c14868f3c512fa5cbb6e458e4a989');
       });
     });
 

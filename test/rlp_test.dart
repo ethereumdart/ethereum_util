@@ -90,8 +90,11 @@ void main() {
     expect(String.fromCharCodes(encoded), equals('a'));
   });
 
-  test('length of string >55 should return 0xb7+len(len(data)) plus len(data) plus data', () {
-    var encoded = Rlp.encode('zoo255zoo255zzzzzzzzzzzzssssssssssssssssssssssssssssssssssssssssssssss');
+  test(
+      'length of string >55 should return 0xb7+len(len(data)) plus len(data) plus data',
+      () {
+    var encoded = Rlp.encode(
+        'zoo255zoo255zzzzzzzzzzzzssssssssssssssssssssssssssssssssssssssssssssss');
     expect(encoded.length, equals(72));
     expect(encoded[0], equals(184));
     expect(encoded[1], equals(70));
@@ -547,7 +550,8 @@ void main() {
     ]));
   });
 
-  var jsonString = File(path.join(Directory.current.path, 'test/data/rlp.json')).readAsStringSync();
+  var jsonString = File(path.join(Directory.current.path, 'test/data/rlp.json'))
+      .readAsStringSync();
   Map tests = jsonDecode(jsonString);
 
   tests.entries.forEach((entry) {
@@ -564,15 +568,19 @@ void main() {
   });
 
   test('Random contract address from nonce and sender', () {
-    var encoded = Rlp.encode([toBuffer('0xdb6a20a121dbdfac68b172456f90e594fe206e01'), 3]);
+    var encoded =
+        Rlp.encode([toBuffer('0xdb6a20a121dbdfac68b172456f90e594fe206e01'), 3]);
     var out = Digest('SHA-3/256').process(Uint8List.fromList(encoded));
-    expect(hex.encode(out.sublist(12)), equals('52d1b00ecb88d6aebc15d21559b368e818df388c'));
+    expect(hex.encode(out.sublist(12)),
+        equals('52d1b00ecb88d6aebc15d21559b368e818df388c'));
   });
 
   test('Cryptokitties contract address from nonce and sender', () {
-    var encoded = Rlp.encode([toBuffer('0xba52c75764d6f594735dc735be7f1830cdf58ddf'), 3515]);
+    var encoded = Rlp.encode(
+        [toBuffer('0xba52c75764d6f594735dc735be7f1830cdf58ddf'), 3515]);
     var out = Digest('SHA-3/256').process(Uint8List.fromList(encoded));
     print(hex.encode(out.sublist(12)));
-    expect(hex.encode(out.sublist(12)), equals('06012c8cf97bead5deae237070f9587f8e7a266d'));
+    expect(hex.encode(out.sublist(12)),
+        equals('06012c8cf97bead5deae237070f9587f8e7a266d'));
   });
 }

@@ -2,7 +2,7 @@ import "dart:convert" show utf8, jsonEncode;
 import "dart:typed_data";
 
 import 'package:convert/convert.dart' show hex;
-import 'package:pointycastle/src/utils.dart' as p_utils;
+import 'package:ethereum_util/src/bigint.dart';
 
 import './utils.dart' as utils;
 
@@ -84,7 +84,7 @@ Uint8List toBuffer(v) {
     } else if (v == null) {
       v = Uint8List(0);
     } else if (v is BigInt) {
-      v = Uint8List.fromList(p_utils.encodeBigInt(v));
+      v = Uint8List.fromList(encodeBigInt(v));
     } else {
       throw 'invalid type';
     }
@@ -95,7 +95,7 @@ Uint8List toBuffer(v) {
 
 /// Converts a [Uint8List] to a [int].
 int bufferToInt(Uint8List buf) {
-  return p_utils.decodeBigInt(toBuffer(buf)).toInt();
+  return decodeBigInt(toBuffer(buf)).toInt();
 }
 
 /// Converts a [Uint8List] into a hex [String].
@@ -104,14 +104,14 @@ String bufferToHex(Uint8List buf) {
 }
 
 /// Interprets a [Uint8List] as a signed integer and returns a [BigInt]. Assumes 256-bit numbers.
-// FIXME: BigInt fromSigned(Uint8List signedInt) {
-//   throw 'unimplemented';
-// }
+BigInt fromSigned(Uint8List signedInt) {
+  return decodeBigInt(signedInt).toSigned(256);
+}
 
 /// Converts a [BigInt] to an unsigned integer and returns it as a [Uint8List]. Assumes 256-bit numbers.
-/// FIXME: Uint8List toUnsigned(BigInt unsignedInt) {
-///   throw 'unimplemented';
-/// }
+Uint8List toUnsigned(BigInt unsignedInt) {
+  return encodeBigInt(unsignedInt.toUnsigned(256));
+}
 
 /// Adds "0x" to a given [String] if it does not already start with "0x".
 String addHexPrefix(String str) {
