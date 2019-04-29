@@ -8,3 +8,4 @@ Ported from:
 - https://github.com/maxholman/rlp
 - https://github.com/MetaMask/eth-sig-util
 - https://github.com/ethereumjs/ethereumjs-abi
+- https://github.com/ethereumjs/ethereumjs-wallet
