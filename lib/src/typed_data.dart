@@ -9,6 +9,9 @@ import 'package:ethereum_util/src/signature.dart';
 import 'package:ethereum_util/src/utils.dart';
 import 'package:json_schema/json_schema.dart';
 import 'package:meta/meta.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'typed_data.g.dart';
 
 /// Returns a continuous, hex-prefixed hex value for the signature,
 /// suitable for inclusion in a JSON transaction's data field.
@@ -75,6 +78,7 @@ class MsgParams {
   }
 }
 
+@JsonSerializable(nullable: true)
 class TypedData {
   Map<String, List<TypedDataField>> types;
   String primaryType;
@@ -82,15 +86,29 @@ class TypedData {
   Map<String, dynamic> message;
 
   TypedData({this.types, this.primaryType, this.domain, this.message});
+
+  factory TypedData.fromJson(Map<String, dynamic> json) =>
+      _$TypedDataFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$TypedDataToJson(this);
 }
 
+@JsonSerializable(nullable: true)
 class TypedDataField {
   String name;
   String type;
 
   TypedDataField({@required this.name, @required this.type});
+
+  factory TypedDataField.fromJson(Map<String, dynamic> json) =>
+      _$TypedDataFieldFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$TypedDataFieldToJson(this);
 }
 
+@JsonSerializable(nullable: true)
 class EIP712Domain {
   String name;
   String version;
@@ -113,28 +131,12 @@ class EIP712Domain {
         throw ArgumentError("Key ${key} is invalid");
     }
   }
-}
 
-class TypedDataMessage {
-  TypedDataMessageSender from;
-  TypedDataMessageRecipient to;
-  String contents;
+  factory EIP712Domain.fromJson(Map<String, dynamic> json) =>
+      _$EIP712DomainFromJson(json);
 
-  TypedDataMessage({this.from, this.to, this.contents});
-}
-
-class TypedDataMessageSender {
-  String name;
-  String address;
-
-  TypedDataMessageSender({this.name, this.address});
-}
-
-class TypedDataMessageRecipient {
-  String name;
-  String address;
-
-  TypedDataMessageRecipient({this.name, this.address});
+  @override
+  Map<String, dynamic> toJson() => _$EIP712DomainToJson(this);
 }
 
 class TypedDataUtils {
