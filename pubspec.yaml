@@ -16,6 +16,7 @@ dependencies:
   equatable: ^0.2.3
   collection: ^1.14.11
   json_schema: ^2.2.0
+  json_annotation: ^2.0.0
   json_serializable: ^2.0.0
 
 dev_dependencies:
