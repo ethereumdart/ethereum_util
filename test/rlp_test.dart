@@ -23,6 +23,7 @@ void main() {
     var encoded = Rlp.encode('dog');
     expect(encoded.length, equals(4));
     expect(encoded, equals([0x83]..addAll('dog'.codeUnits)));
+    expect(Rlp.decode(encoded), 'dog'.codeUnits);
   });
 
   test('The list cat, dog', () {
@@ -35,41 +36,49 @@ void main() {
           [0x83],
           'dog'.codeUnits
         ].expand((x) => x).toList()));
+    expect(Rlp.decode(encoded), ['cat'.codeUnits, 'dog'.codeUnits]);
   });
 
   test('The empty string', () {
     var encoded = Rlp.encode('');
     expect(encoded, equals([0x80]));
+    expect(Rlp.decode(encoded), ''.codeUnits);
   });
 
   test('The empty list', () {
     var encoded = Rlp.encode([]);
     expect(encoded, equals([0xc0]));
+    expect(Rlp.decode(encoded), []);
   });
 
   test('The integer 0', () {
     var encoded = Rlp.encode(0);
     expect(encoded, equals([0x80]));
+    expect(Rlp.decode(encoded), []);
   });
 
   test('The integer 1', () {
     var encoded = Rlp.encode(1);
     expect(encoded, equals([0x01]));
+    expect(Rlp.decode(encoded), [1]);
   });
 
   test('The encoded integer 0', () {
     var encoded = Rlp.encode('\x00');
     expect(encoded, equals([0x00]));
+    expect(Rlp.decode(encoded), [0]);
   });
 
   test('The encoded integer 15', () {
     var encoded = Rlp.encode('\x0f');
     expect(encoded, equals([0x0f]));
+    expect(Rlp.decode(encoded), [0x0f]);
   });
 
   test('The encoded integer 1024', () {
     var encoded = Rlp.encode('\x04\x00');
     expect(encoded, equals([0x82, 0x04, 0x00]));
+    expect(Rlp.decode(encoded), [0x04, 0x00]);
   });
 
   test('The set theoretical representation of three', () {
@@ -82,25 +91,36 @@ void main() {
       ]
     ]);
     expect(encoded, equals([0xc7, 0xc0, 0xc1, 0xc0, 0xc3, 0xc0, 0xc1, 0xc0]));
+    expect(Rlp.decode(encoded), [
+      [],
+      [[]],
+      [
+        [],
+        [[]]
+      ]
+    ]);
   });
 
   // Check behaviour against the js version of rlp
   test('The string a', () {
     var encoded = Rlp.encode('a');
     expect(String.fromCharCodes(encoded), equals('a'));
+    expect(Rlp.decode(encoded), 'a'.codeUnits);
   });
 
   test(
       'length of string >55 should return 0xb7+len(len(data)) plus len(data) plus data',
       () {
-    var encoded = Rlp.encode(
-        'zoo255zoo255zzzzzzzzzzzzssssssssssssssssssssssssssssssssssssssssssssss');
+    String input =
+        'zoo255zoo255zzzzzzzzzzzzssssssssssssssssssssssssssssssssssssssssssssss';
+    var encoded = Rlp.encode(input);
     expect(encoded.length, equals(72));
     expect(encoded[0], equals(184));
     expect(encoded[1], equals(70));
     expect(encoded[2], equals(122));
     expect(encoded[3], equals(111));
     expect(encoded[12], equals(53));
+    expect(Rlp.decode(encoded), input.codeUnits);
   });
 
   // Check behaviour against the js version of rlp
@@ -111,6 +131,8 @@ void main() {
     expect(encoded[1], equals(131));
     expect(encoded[11], equals(97));
     expect(encoded[12], equals(116));
+    expect(Rlp.decode(encoded),
+        ['dog'.codeUnits, 'god'.codeUnits, 'cat'.codeUnits]);
   });
 
   // Check behaviour against the js version of rlp
