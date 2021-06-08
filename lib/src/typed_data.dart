@@ -8,8 +8,7 @@ import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/signature.dart';
 import 'package:ethereum_util/src/utils.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:json_schema/json_schema.dart';
-import 'package:meta/meta.dart';
+import 'package:json_schema2/json_schema2.dart';
 
 part 'typed_data.g.dart';
 
@@ -25,8 +24,8 @@ String concatSig(Uint8List r, Uint8List s, Uint8List v) {
   return addHexPrefix(rStr + sStr + vStr);
 }
 
-String signTypedData(Uint8List privateKey, MsgParams msgParams) {
-  var message = TypedDataUtils.sign(msgParams.data);
+String signTypedData(Uint8List privateKey, TypedData data) {
+  var message = TypedDataUtils.sign(data);
   var sig = sign(message, privateKey);
   return concatSig(toBuffer(sig.r), toBuffer(sig.s), toBuffer(sig.v));
 }
@@ -49,7 +48,7 @@ String _padWithZeroes(String number, int length) {
 
 String normalize(dynamic input) {
   if (input == null) {
-    return null;
+    return '';
   }
 
   if (!(input is String) && !(input is int)) {
@@ -68,7 +67,7 @@ class MsgParams {
   TypedData data;
   String sig;
 
-  MsgParams({this.data, this.sig});
+  MsgParams({required this.data, required this.sig});
 
   Uint8List recoverPublicKey() {
     var sigParams = fromRpcSig(sig);
@@ -78,44 +77,52 @@ class MsgParams {
   }
 }
 
-@JsonSerializable(nullable: true)
+@JsonSerializable()
 class TypedData {
   Map<String, List<TypedDataField>> types;
   String primaryType;
   EIP712Domain domain;
   Map<String, dynamic> message;
 
-  TypedData({this.types, this.primaryType, this.domain, this.message});
+  TypedData({
+    required this.types,
+    required this.primaryType,
+    required this.domain,
+    required this.message,
+  });
 
   factory TypedData.fromJson(Map<String, dynamic> json) =>
       _$TypedDataFromJson(json);
 
-  @override
   Map<String, dynamic> toJson() => _$TypedDataToJson(this);
 }
 
-@JsonSerializable(nullable: true)
+@JsonSerializable()
 class TypedDataField {
   String name;
   String type;
 
-  TypedDataField({@required this.name, @required this.type});
+  TypedDataField({required this.name, required this.type});
 
   factory TypedDataField.fromJson(Map<String, dynamic> json) =>
       _$TypedDataFieldFromJson(json);
 
-  @override
   Map<String, dynamic> toJson() => _$TypedDataFieldToJson(this);
 }
 
-@JsonSerializable(nullable: true)
+@JsonSerializable()
 class EIP712Domain {
   String name;
   String version;
   int chainId;
   String verifyingContract;
 
-  EIP712Domain({this.name, this.version, this.chainId, this.verifyingContract});
+  EIP712Domain({
+    required this.name,
+    required this.version,
+    required this.chainId,
+    required this.verifyingContract,
+  });
 
   dynamic operator [](String key) {
     switch (key) {
@@ -135,7 +142,6 @@ class EIP712Domain {
   factory EIP712Domain.fromJson(Map<String, dynamic> json) =>
       _$EIP712DomainFromJson(json);
 
-  @override
   Map<String, dynamic> toJson() => _$EIP712DomainToJson(this);
 }
 
@@ -166,12 +172,12 @@ class TypedDataUtils {
       throw ArgumentError("Unsupported data type");
     }
 
-    var encodedTypes = List<String>();
+    var encodedTypes = <String>[];
     encodedTypes.add('bytes32');
-    var encodedValues = List<dynamic>();
+    var encodedValues = <dynamic>[];
     encodedValues.add(hashType(primaryType, types));
 
-    types[primaryType].forEach((TypedDataField field) {
+    types[primaryType]!.forEach((TypedDataField field) {
       var value = data[field.name];
       if (value != null) {
         if (field.type == 'bytes') {
@@ -217,14 +223,14 @@ class TypedDataUtils {
       }
       result += dep +
           '(' +
-          types[dep].map((field) => field.type + ' ' + field.name).join(',') +
+          types[dep]!.map((field) => field.type + ' ' + field.name).join(',') +
           ')';
     });
     return result;
   }
 
   /**
-   * Finds all types within a type defintion object
+   * Finds all types within a type definition object
    *
    * @param {string} primaryType - Root type
    * @param {Object} types - Type definitions
@@ -232,16 +238,18 @@ class TypedDataUtils {
    * @returns {Array} - Set of all types found in the type definition
    */
   static List<String> findTypeDependencies(
-      String primaryType, Map<String, List<TypedDataField>> types,
-      {List<String> results}) {
-    if (results == null) {
-      results = List();
+    String primaryType,
+    Map<String, List<TypedDataField>> types, {
+    List<String> results = const [],
+  }) {
+    if (results.isEmpty) {
+      results = [];
     }
     if (results.indexOf(primaryType) >= 0 || !types.containsKey(primaryType)) {
       return results;
     }
     results.add(primaryType);
-    types[primaryType].forEach((TypedDataField field) {
+    types[primaryType]!.forEach((TypedDataField field) {
       findTypeDependencies(field.type, types, results: results).forEach((dep) {
         if (results.indexOf(dep) == -1) {
           results.add(dep);

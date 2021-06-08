@@ -71,7 +71,7 @@ String unpadString(String a) {
 Uint8List toBuffer(v) {
   if (!(v is Uint8List)) {
     if (v is List) {
-      v = Uint8List.fromList(v);
+      v = Uint8List.fromList(v.cast());
     } else if (v is String) {
       if (utils.isHexString(v)) {
         v = Uint8List.fromList(

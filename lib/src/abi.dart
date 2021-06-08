@@ -29,7 +29,7 @@ Uint8List rawEncode(List<String> types, values) {
       var size = parseTypeArray(type);
 
       if (size != 'dynamic') {
-        headLength += 32 * size;
+        headLength += 32 * (size as int);
       } else {
         headLength += 32;
       }
@@ -58,12 +58,12 @@ Uint8List rawEncode(List<String> types, values) {
 }
 
 Uint8List encodeSingle(String type, dynamic arg) {
-  var size, i;
+  var size;
 
   if (type == 'address') {
     return encodeSingle('uint160', parseNumber(arg));
   } else if (type == 'bool') {
-    int val;
+    int val = 0;
     if (arg is int) {
       val = arg == 0 ? 0 : 1;
     } else if (arg is bool) {
@@ -87,7 +87,7 @@ Uint8List encodeSingle(String type, dynamic arg) {
     var ret = BytesBuffer();
     type = type.substring(0, type.lastIndexOf('['));
     if (arg is String) {
-      arg = jsonDecode(arg);
+      arg = jsonDecode((arg as String));
     }
 
     if (size == 'dynamic') {
@@ -106,7 +106,7 @@ Uint8List encodeSingle(String type, dynamic arg) {
     ret.add(arg);
 
     if ((arg.length % 32) != 0) {
-      ret.add(zeros(32 - (arg.length % 32)));
+      ret.add(zeros(32 - ((arg.length as int) % 32)));
     }
 
     return ret.toBytes();
@@ -188,24 +188,27 @@ String elementaryName(String name) {
 }
 
 /// Parse N from type<N>
-int parseTypeN(String type) {
-  return int.parse(RegExp(r'^\D+(\d+)$').firstMatch(type).group(1), radix: 10);
-}
+int parseTypeN(String type) => int.parse(
+      RegExp(r'^\D+(\d+)$').firstMatch(type)!.group(1) ?? '',
+      radix: 10,
+    );
 
 /// Parse N,M from type<N>x<M>
 List<int> parseTypeNxM(String type) {
-  var tmp = RegExp(r'^\D+(\d+)x(\d+)$').firstMatch(type);
+  final firstMatch = RegExp(r'^\D+(\d+)x(\d+)$').firstMatch(type);
   return [
-    int.parse(tmp.group(1), radix: 10),
-    int.parse(tmp.group(2), radix: 10)
+    int.parse(firstMatch!.group(1) ?? '', radix: 10),
+    int.parse(firstMatch.group(2) ?? '', radix: 10)
   ];
 }
 
 /// Parse N in type[<N>] where "type" can itself be an array type.
 dynamic parseTypeArray(String type) {
-  var tmp = RegExp(r'(.*)\[(.*?)\]$').firstMatch(type);
-  if (tmp != null) {
-    return tmp.group(2) == '' ? 'dynamic' : int.parse(tmp.group(2), radix: 10);
+  final firstMatch = RegExp(r'(.*)\[(.*?)\]$').firstMatch(type);
+  if (firstMatch != null) {
+    return firstMatch.group(2) == ''
+        ? 'dynamic'
+        : int.parse(firstMatch.group(2) ?? '', radix: 10);
   }
   return null;
 }

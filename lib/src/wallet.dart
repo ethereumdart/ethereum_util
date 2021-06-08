@@ -7,10 +7,9 @@ class Wallet {
   Uint8List _privKey;
   Uint8List _pubKey;
 
-  Wallet.fromPrivateKey(Uint8List key) {
-    this._privKey = key;
-    this._pubKey = privateKeyToPublicKey(key);
-  }
+  Wallet.fromPrivateKey(Uint8List key)
+      : this._privKey = key,
+        this._pubKey = privateKeyToPublicKey(key);
 
   String getAddressString() {
     return bufferToHex(publicKeyToAddress(_pubKey));

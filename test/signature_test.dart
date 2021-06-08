@@ -15,7 +15,8 @@ var ropstenChainId = 3; // ropsten
 void main() {
   group('sign', () {
     test('should produce a signature', () {
-      var sig = signature.sign(echash, ecprivkey);
+      var sig = signature.sign(
+          Uint8List.fromList(echash), Uint8List.fromList(ecprivkey));
       expect(
           encodeBigInt(sig.r),
           hex.decode(
@@ -28,7 +29,9 @@ void main() {
     });
 
     test('should produce a signature for Ropsten testnet', () {
-      var sig = signature.sign(echash, ecprivkey, chainId: ropstenChainId);
+      var sig = signature.sign(
+          Uint8List.fromList(echash), Uint8List.fromList(ecprivkey),
+          chainId: ropstenChainId);
       expect(
           encodeBigInt(sig.r),
           hex.decode(
@@ -49,8 +52,9 @@ void main() {
           '129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 27;
       var pubkey = signature.recoverPublicKeyFromSignature(
-          signature.ECDSASignature(r, s, v), echash);
-      expect(pubkey, signature.privateKeyToPublicKey(ecprivkey));
+          signature.ECDSASignature(r, s, v), Uint8List.fromList(echash));
+      expect(pubkey,
+          signature.privateKeyToPublicKey(Uint8List.fromList(ecprivkey)));
     });
 
     test('should recover a public key (ropstenChainId = 3)', () {
@@ -60,9 +64,10 @@ void main() {
           '129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 41;
       var pubkey = signature.recoverPublicKeyFromSignature(
-          signature.ECDSASignature(r, s, v), echash,
+          signature.ECDSASignature(r, s, v), Uint8List.fromList(echash),
           chainId: ropstenChainId);
-      expect(pubkey, signature.privateKeyToPublicKey(ecprivkey));
+      expect(pubkey,
+          signature.privateKeyToPublicKey(Uint8List.fromList(ecprivkey)));
     });
 
     test('should fail on an invalid signature (v = 21)', () {
@@ -73,7 +78,7 @@ void main() {
       var v = 21;
       expect(
           () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(r, s, v), echash),
+              signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)),
           throwsArgumentError);
     });
 
@@ -85,7 +90,7 @@ void main() {
       var v = 29;
       expect(
           () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(r, s, v), echash),
+              signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)),
           throwsArgumentError);
     });
 
@@ -97,7 +102,7 @@ void main() {
       var v = 27;
       expect(
           () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(s, r, v), echash),
+              signature.ECDSASignature(s, r, v), Uint8List.fromList(echash)),
           throwsArgumentError);
     });
   });

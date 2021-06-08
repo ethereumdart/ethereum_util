@@ -46,7 +46,7 @@ void main() {
   test('signedTypeData', () {
     var privateKey = sha3(Uint8List.fromList(utf8.encode('cow')));
     var address = privateKeyToAddress(privateKey);
-    var sig = signTypedData(privateKey, MsgParams(data: typedData));
+    var sig = signTypedData(privateKey, typedData);
 
     expect(TypedDataUtils.encodeType('Mail', typedData.types),
         'Mail(Person from,Person to,string contents)Person(string name,address wallet)');
