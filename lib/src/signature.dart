@@ -9,8 +9,8 @@ import 'package:ethereum_util/src/bigint.dart';
 import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/hash.dart';
 import 'package:ethereum_util/src/random.dart';
+import 'package:pointycastle/digests/keccak.dart';
 import 'package:pointycastle/digests/sha256.dart';
-import 'package:pointycastle/digests/sha3.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
 import 'package:pointycastle/key_generators/ec_key_generator.dart';
 import 'package:pointycastle/macs/hmac.dart';
@@ -21,7 +21,7 @@ final ECDomainParameters params = ECCurve_secp256k1();
 final BigInt _halfCurveOrder = params.n ~/ BigInt.two;
 
 const int _shaBytes = 256 ~/ 8;
-final SHA3Digest sha3digest = SHA3Digest(_shaBytes * 8);
+final KeccakDigest keccakDigest = KeccakDigest(_shaBytes * 8);
 
 /// Signatures used to sign Ethereum transactions and messages.
 class ECDSASignature extends Equatable {
@@ -29,12 +29,15 @@ class ECDSASignature extends Equatable {
   final BigInt s;
   final int v;
 
-  ECDSASignature(this.r, this.s, this.v) : super([r, s, v]);
+  ECDSASignature(this.r, this.s, this.v);
+
+  @override
+  List<Object> get props => [r, s, v];
 }
 
 Uint8List sha3(Uint8List input) {
-  sha3digest.reset();
-  return sha3digest.process(input);
+  keccakDigest.reset();
+  return keccakDigest.process(input);
 }
 
 /// Generates a new private key using the random instance provided. Please make
@@ -66,7 +69,7 @@ Uint8List privateKeyToPublicKey(Uint8List privateKey) {
 Uint8List publicKeyToAddress(Uint8List publicKey) {
   assert(publicKey.length == 64);
 
-  final hashed = sha3digest.process(publicKey);
+  final hashed = keccakDigest.process(publicKey);
   return Uint8List.view(hashed.buffer, _shaBytes - 20);
 }
 

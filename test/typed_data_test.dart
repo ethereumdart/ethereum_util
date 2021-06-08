@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'dart:typed_data';
+
 import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/signature.dart';
 import 'package:ethereum_util/src/typed_data.dart';

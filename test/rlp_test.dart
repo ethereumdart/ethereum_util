@@ -6,7 +6,7 @@ import 'package:convert/convert.dart';
 import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 import 'package:path/path.dart' as path;
-import "package:pointycastle/pointycastle.dart";
+import 'package:pointycastle/digests/keccak.dart';
 import 'package:test/test.dart';
 
 dynamic castTestValue(dynamic testValue) {
@@ -592,7 +592,7 @@ void main() {
   test('Random contract address from nonce and sender', () {
     var encoded =
         Rlp.encode([toBuffer('0xdb6a20a121dbdfac68b172456f90e594fe206e01'), 3]);
-    var out = Digest('SHA-3/256').process(Uint8List.fromList(encoded));
+    var out = KeccakDigest(256).process(Uint8List.fromList(encoded));
     expect(hex.encode(out.sublist(12)),
         equals('52d1b00ecb88d6aebc15d21559b368e818df388c'));
   });
@@ -600,8 +600,7 @@ void main() {
   test('Cryptokitties contract address from nonce and sender', () {
     var encoded = Rlp.encode(
         [toBuffer('0xba52c75764d6f594735dc735be7f1830cdf58ddf'), 3515]);
-    var out = Digest('SHA-3/256').process(Uint8List.fromList(encoded));
-    print(hex.encode(out.sublist(12)));
+    var out = KeccakDigest(256).process(Uint8List.fromList(encoded));
     expect(hex.encode(out.sublist(12)),
         equals('06012c8cf97bead5deae237070f9587f8e7a266d'));
   });

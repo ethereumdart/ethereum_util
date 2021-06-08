@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:ethereum_util/src/bytes.dart' as bytes;
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
+import 'package:pointycastle/digests/keccak.dart';
 import 'package:pointycastle/pointycastle.dart';
 
 ///
@@ -9,8 +10,7 @@ import 'package:pointycastle/pointycastle.dart';
 ///
 Uint8List keccak(dynamic a, {int bits: 256}) {
   a = bytes.toBuffer(a);
-  Digest sha3 = new Digest("SHA-3/${bits}");
-  return sha3.process(a);
+  return KeccakDigest(bits).process(a);
 }
 
 ///
