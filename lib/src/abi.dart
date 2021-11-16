@@ -9,8 +9,7 @@ import 'package:ethereum_util/src/hash.dart';
 import 'package:ethereum_util/src/utils.dart' as utils;
 
 Uint8List eventID(String name, List<String> types) {
-  // FIXME: use node.js util.format?
-  var sig = name + '(' + types.map(elementaryName).join(',') + ')';
+  String sig = '$name(${types.map(elementaryName).join(',')})';
   return keccak(toBuffer(sig));
 }
 
@@ -58,7 +57,7 @@ Uint8List rawEncode(List<String> types, values) {
 }
 
 Uint8List encodeSingle(String type, dynamic arg) {
-  var size, i;
+  var size;
 
   if (type == 'address') {
     return encodeSingle('uint160', parseNumber(arg));
@@ -81,22 +80,17 @@ Uint8List encodeSingle(String type, dynamic arg) {
       throw new ArgumentError('Not an array?');
     }
     size = parseTypeArray(type);
-    if (size != 'dynamic' && size != 0 && arg.length > size) {
-      throw new ArgumentError('Elements exceed array size: ${size}');
-    }
+    if (size != 'dynamic' && size != 0 && arg.length > size) throw new ArgumentError('Elements exceed array size: $size');
+
     var ret = BytesBuffer();
     type = type.substring(0, type.lastIndexOf('['));
-    if (arg is String) {
-      arg = jsonDecode(arg);
-    }
+    if (arg is String) arg = jsonDecode(arg);
 
     if (size == 'dynamic') {
       var length = encodeSingle('uint256', arg.length);
       ret.add(length);
     }
-    arg.forEach((v) {
-      ret.add(encodeSingle(type, v));
-    });
+    arg.forEach((v) => ret.add(encodeSingle(type, v)));
     return ret.toBytes();
   } else if (type == 'bytes') {
     arg = toBuffer(arg);
@@ -105,28 +99,25 @@ Uint8List encodeSingle(String type, dynamic arg) {
     ret.add(encodeSingle('uint256', arg.length));
     ret.add(arg);
 
-    if ((arg.length % 32) != 0) {
-      ret.add(zeros(32 - (arg.length % 32)));
-    }
+    if ((arg.length % 32) != 0) ret.add(zeros(32 - (arg.length % 32)));
 
     return ret.toBytes();
   } else if (type.startsWith('bytes')) {
     size = parseTypeN(type);
     if (size < 1 || size > 32) {
-      throw new ArgumentError('Invalid bytes<N> width: ${size}');
+      throw new ArgumentError('Invalid bytes<N> width: $size');
     }
 
     return setLengthRight(toBuffer(arg), 32);
   } else if (type.startsWith('uint')) {
     size = parseTypeN(type);
-    if ((size % 8 > 0) || (size < 8) || (size > 256)) {
-      throw new ArgumentError('Invalid uint<N> width: ${size}');
+    if (size % 8 > 0 || size < 8 || size > 256) {
+      throw new ArgumentError('Invalid uint<N> width: $size');
     }
 
     var num = parseNumber(arg);
     if (num.bitLength > size) {
-      throw new ArgumentError(
-          'Supplied uint exceeds width: ${size} vs ${num.bitLength}');
+      throw new ArgumentError('Supplied uint exceeds width: $size vs ${num.bitLength}');
     }
 
     if (num < BigInt.zero) {
@@ -136,14 +127,13 @@ Uint8List encodeSingle(String type, dynamic arg) {
     return encodeBigInt(num, length: 32);
   } else if (type.startsWith('int')) {
     size = parseTypeN(type);
-    if ((size % 8 != 0) || (size < 8) || (size > 256)) {
-      throw new ArgumentError('Invalid int<N> width: ${size}');
+    if (size % 8 != 0 || size < 8 || size > 256) {
+      throw new ArgumentError('Invalid int<N> width: $size');
     }
 
     var num = parseNumber(arg);
     if (num.bitLength > size) {
-      throw new ArgumentError(
-          'Supplied int exceeds width: ${size} vs ${num.bitLength}');
+      throw new ArgumentError('Supplied int exceeds width: $size vs ${num.bitLength}');
     }
 
     return encodeBigInt(num.toUnsigned(256), length: 32);
@@ -152,9 +142,7 @@ Uint8List encodeSingle(String type, dynamic arg) {
 
     var num = parseNumber(arg);
 
-    if (num < BigInt.zero) {
-      throw new ArgumentError('Supplied ufixed is negative');
-    }
+    if (num < BigInt.zero) throw new ArgumentError('Supplied ufixed is negative');
 
     return encodeSingle('uint256', num * BigInt.two.pow(size[1]));
   } else if (type.startsWith('fixed')) {
@@ -163,7 +151,7 @@ Uint8List encodeSingle(String type, dynamic arg) {
     return encodeSingle('int256', parseNumber(arg) * BigInt.two.pow(size[1]));
   }
 
-  throw new ArgumentError('Unsupported or invalid type: ' + type);
+  throw new ArgumentError('Unsupported or invalid type: $type');
 }
 
 String elementaryName(String name) {
@@ -212,11 +200,9 @@ dynamic parseTypeArray(String type) {
 
 BigInt parseNumber(dynamic arg) {
   if (arg is String) {
-    if (utils.isHexPrefixed(arg)) {
-      return decodeBigInt(hex.decode(utils.stripHexPrefix(arg)));
-    } else {
-      return BigInt.parse(arg, radix: 10);
-    }
+    if (utils.isHexPrefixed(arg)) return decodeBigInt(hex.decode(utils.stripHexPrefix(arg)));
+
+    return BigInt.parse(arg, radix: 10);
   } else if (arg is int) {
     return BigInt.from(arg);
   } else if (arg is BigInt) {
@@ -233,7 +219,5 @@ bool isArray(String type) {
 /// Is a type dynamic?
 bool isDynamic(String type) {
   // FIXME: handle all types? I don't think anything is missing now
-  return (type == 'string') ||
-      (type == 'bytes') ||
-      (parseTypeArray(type) == 'dynamic');
+  return type == 'string' || type == 'bytes' || parseTypeArray(type) == 'dynamic';
 }

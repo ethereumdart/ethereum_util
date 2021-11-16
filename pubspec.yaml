@@ -8,11 +8,11 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  meta: ^1.1.6
-  convert: ^2.1.1
+  meta: ^1.7.0
+  convert: ^3.0.0
   quiver: '>=2.0.0 <3.0.0'
-  pointycastle: ^1.0.1
-  buffer: ^1.0.6
+  pointycastle: ^3.4.0
+  buffer: ^1.1.1
   equatable: ^0.2.3
   collection: ^1.14.11
   json_schema: ^2.2.0

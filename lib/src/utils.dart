@@ -20,27 +20,26 @@ String stripHexPrefix(String str) {
 String padToEven(String value) {
   checkNotNull(value);
 
-  var a = "${value}";
-
-  if (a.length % 2 == 1) {
-    a = "0${a}";
-  }
+  var a = '$value';
+  if (a.length % 2 == 1) a = "0${a}";
 
   return a;
 }
 
 /// Converts a [int] into a hex [String]
-String intToHex(int i) {
+String intToHex(i) {
   checkNotNull(i);
 
-  return "0x${i.toRadixString(16)}";
+  return '0x${i.toRadixString(16)}';
 }
 
-/// Converts an [int] to a [Uint8List]
-Uint8List intToBuffer(int i) {
-  checkNotNull(i);
+/// Converts an [int] or [BigInt] to a [Uint8List]
+Uint8List intToBuffer(i) {
+  return Uint8List.fromList(i == null || i == 0 ? [] : hex.decode(padToEven(intToHex(i).substring(2))));
+}
 
-  return Uint8List.fromList(hex.decode(padToEven(intToHex(i).substring(2))));
+Uint8List stringToBuffer(String i) {
+  return Uint8List.fromList(hex.decode(padToEven(stripHexPrefix(i))));
 }
 
 /// Get the binary size of a string
@@ -50,25 +49,21 @@ int getBinarySize(String str) {
   return utf8.encode(str).length;
 }
 
-/// Returns TRUE if the first specified array contains all elements
-/// from the second one. FALSE otherwise.
+/// Returns TRUE if the first specified array contains all elements from the second one. FALSE otherwise.
 bool arrayContainsArray(List superset, List subset, {bool some: false}) {
   checkNotNull(superset);
   checkNotNull(subset);
 
-  if (some) {
-    return Set.from(superset).intersection(Set.from(subset)).length > 0;
-  } else {
-    return Set.from(superset).containsAll(subset);
-  }
+  if (some) return Set.from(superset).intersection(Set.from(subset)).length > 0;
+
+  return Set.from(superset).containsAll(subset);
 }
 
 /// Should be called to get utf8 from it's hex representation
 String toUtf8(String hexString) {
   checkNotNull(hexString);
 
-  var bufferValue = hex.decode(
-      padToEven(stripHexPrefix(hexString).replaceAll(RegExp('^0+|0+\$'), '')));
+  List<int> bufferValue = hex.decode(padToEven(stripHexPrefix(hexString).replaceAll(RegExp('^0+|0+\$'), '')));
 
   return utf8.decode(bufferValue);
 }
@@ -94,28 +89,22 @@ String fromUtf8(String stringValue) {
 String fromAscii(String stringValue) {
   checkNotNull(stringValue);
 
-  var hexString = ''; // eslint-disable-line
+  var hexString = '';
   for (var i = 0; i < stringValue.length; i++) {
-    // eslint-disable-line
     var code = stringValue.codeUnitAt(i);
     var n = hex.encode([code]);
-    hexString += n.length < 2 ? "0${n}" : n;
+    hexString += n.length < 2 ? '0${n}' : n;
   }
 
-  return "0x${hexString}";
+  return '0x$hexString';
 }
 
 /// Is the string a hex string.
 bool isHexString(String value, {int length = 0}) {
   checkNotNull(value);
 
-  if (!RegExp('^0x[0-9A-Fa-f]*\$').hasMatch(value)) {
-    return false;
-  }
-
-  if (length > 0 && value.length != 2 + 2 * length) {
-    return false;
-  }
+  if (!RegExp('^0x[0-9A-Fa-f]*\$').hasMatch(value)) return false;
+  if (length > 0 && value.length != 2 + 2 * length) return false;
 
   return true;
 }

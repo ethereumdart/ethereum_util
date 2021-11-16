@@ -1,10 +1,9 @@
-import "dart:convert" show utf8, jsonEncode;
-import "dart:typed_data";
+import 'dart:convert' show utf8, jsonEncode;
+import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
 import 'package:ethereum_util/src/bigint.dart';
-
-import './utils.dart' as utils;
+import 'package:ethereum_util/src/utils.dart' as utils;
 
 /// Returns a buffer filled with 0s.
 Uint8List zeros(int bytes) {
@@ -13,8 +12,7 @@ Uint8List zeros(int bytes) {
   return buffer;
 }
 
-/// Left Pads an [Uint8List] with leading zeros till it has [length] bytes.
-/// Or it truncates the beginning if it exceeds.
+/// Left Pads an [Uint8List] with leading zeros till it has [length] bytes. Or it truncates the beginning if it exceeds.
 Uint8List setLengthLeft(Uint8List msg, int length, {bool right = false}) {
   var buf = zeros(length);
   msg = toBuffer(msg);
@@ -37,8 +35,7 @@ Uint8List setLength(Uint8List msg, int length, {bool right = false}) {
   return setLengthLeft(msg, length, right: right);
 }
 
-/// Right Pads an [Uint8List] with leading zeros till it has [length] bytes.
-/// Or it truncates the beginning if it exceeds.
+/// Right Pads an [Uint8List] with leading zeros till it has [length] bytes. Or it truncates the beginning if it exceeds.
 Uint8List setLengthRight(Uint8List msg, int length) {
   return setLength(msg, length, right: true);
 }
@@ -46,9 +43,7 @@ Uint8List setLengthRight(Uint8List msg, int length) {
 /// Trims leading zeros from a [Uint8List].
 Uint8List unpad(Uint8List a) {
   for (int i = 0; i < a.length; i++) {
-    if (a[i] != 0) {
-      return a.sublist(i);
-    }
+    if (a[i] != 0) return a.sublist(i);
   }
   return Uint8List(0);
 }
@@ -60,9 +55,7 @@ Uint8List stripZeros(Uint8List a) {
 String unpadString(String a) {
   a = utils.stripHexPrefix(a);
   for (int i = 0; i < a.length; i++) {
-    if (a[i] != '0') {
-      return a.substring(i);
-    }
+    if (a[i] != '0') return a.substring(i);
   }
   return '';
 }
@@ -74,8 +67,7 @@ Uint8List toBuffer(v) {
       v = Uint8List.fromList(v);
     } else if (v is String) {
       if (utils.isHexString(v)) {
-        v = Uint8List.fromList(
-            hex.decode(utils.padToEven(utils.stripHexPrefix(v))));
+        v = Uint8List.fromList(hex.decode(utils.padToEven(utils.stripHexPrefix(v))));
       } else {
         v = Uint8List.fromList(utf8.encode(v));
       }

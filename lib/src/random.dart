@@ -4,8 +4,7 @@ import 'dart:typed_data';
 import 'package:ethereum_util/src/bytes.dart' show bufferToInt;
 import 'package:pointycastle/api.dart';
 
-/// Utility to use dart:math's Random class to generate numbers used by
-/// pointycastle.
+/// Utility to use dart:math's Random class to generate numbers used by pointycastle.
 class DartRandom implements SecureRandom {
   Random dartRandom;
 
@@ -19,8 +18,7 @@ class DartRandom implements SecureRandom {
     final fullBytes = bitLength ~/ 8;
     final remainingBits = bitLength % 8;
 
-    // Generate a number from the full bytes. Then, prepend a smaller number
-    // covering the remaining bits.
+    // Generate a number from the full bytes. Then, prepend a smaller number covering the remaining bits.
     final main = bufferToInt(nextBytes(fullBytes));
     final additional = dartRandom.nextInt(1 << remainingBits);
     return BigInt.from(main) + (BigInt.from(additional) << (fullBytes * 8));

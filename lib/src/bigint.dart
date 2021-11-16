@@ -11,8 +11,7 @@ BigInt decodeBigInt(List<int> bytes) {
   return result;
 }
 
-Uint8List encodeBigInt(BigInt input,
-    {Endian endian = Endian.be, int length = 0}) {
+Uint8List encodeBigInt(BigInt input, {Endian endian = Endian.be, int length = 0}) {
   int byteLength = (input.bitLength + 7) >> 3;
   int reqLength = length > 0 ? length : max(1, byteLength);
   assert(byteLength <= reqLength, 'byte array longer than desired length');
