@@ -11,3 +11,4 @@ export './src/signature.dart';
 export './src/typed_data.dart';
 export './src/utils.dart';
 export './src/wallet.dart';
+export './src/eip1559Transaction.dart';
