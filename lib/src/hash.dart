@@ -35,6 +35,6 @@ Uint8List ripemd160(dynamic a, {bool padded: false}) {
 
 /// Creates SHA-3 hash of the RLP encoded version of the input.
 Uint8List rlphash(dynamic a) {
-  a = bytes.toBuffer(a);
+  // a = bytes.toBuffer(a);
   return keccak(Rlp.encode(a));
 }

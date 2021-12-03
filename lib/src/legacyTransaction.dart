@@ -2,20 +2,15 @@ import 'dart:core';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
-
-import 'package:ethereum_util/src/hash.dart';
+import 'package:ethereum_util/ethereum_util.dart';
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 import 'package:ethereum_util/src/signature.dart' as signature;
 import 'package:ethereum_util/src/utils.dart';
 
-int TRANSACTION_TYPE = 2;
-Uint8List TRANSACTION_TYPE_BUFFER = Uint8List.fromList(hex.decode(TRANSACTION_TYPE.toRadixString(16).padLeft(2, '0')));
-
 class TxData {
   int nonce;
   int gasLimit;
-  int maxPriorityFeePerGas;
-  int maxFeePerGas;
+  int gasPrice;
   String to;
   int value;
   String data;
@@ -26,8 +21,7 @@ class TxData {
   TxData({
     this.nonce,
     this.gasLimit,
-    this.maxPriorityFeePerGas,
-    this.maxFeePerGas,
+    this.gasPrice,
     this.to,
     this.value,
     this.data,
@@ -43,44 +37,42 @@ class TxNetwork {
   TxNetwork({this.chainId});
 }
 
-class Eip1559Transaction {
+class LegacyTransaction {
   TxData data;
   TxNetwork network;
 
-  Eip1559Transaction(this.data, this.network);
+  LegacyTransaction(this.data, this.network);
 
   List raw() {
     return [
-      intToBuffer(this.network.chainId),
       intToBuffer(this.data.nonce),
-      intToBuffer(this.data.maxPriorityFeePerGas),
-      intToBuffer(this.data.maxFeePerGas),
+      intToBuffer(this.data.gasPrice),
       intToBuffer(this.data.gasLimit),
       this.data.to == null ? Uint8List.fromList([]) : stringToBuffer(this.data.to),
       intToBuffer(this.data.value),
       this.data.data == null ? Uint8List.fromList([]) : stringToBuffer(this.data.data),
-      [],
-      this.data.v == null ? [] : intToBuffer(this.data.v),
-      this.data.r == null ? [] : intToBuffer(this.data.r),
-      this.data.s == null ? [] : intToBuffer(this.data.s)
+      this.data.v == null ? Uint8List.fromList([]) : intToBuffer(this.data.v),
+      this.data.r == null ? Uint8List.fromList([]) : intToBuffer(this.data.r),
+      this.data.s == null ? Uint8List.fromList([]) : intToBuffer(this.data.s)
     ];
   }
 
   /// Returns the serialized unsigned tx (hashed or raw), which can be used.
   /// Return hashed message if [hashMsg] set to true.
-  List<int> getMessageToSign({bool hashMsg = true}) {
-    List base = this.raw().sublist(0, 9);
-    var msg = TRANSACTION_TYPE_BUFFER + Rlp.encode(base);
+  List<int> getMessageToSign() {
+    List<Uint8List> base = this.raw().sublist(0, 6);
+    base.addAll([
+      intToBuffer(network.chainId),
+      Uint8List.fromList([]),
+      Uint8List.fromList([])
+    ]);
 
-    if (hashMsg) return keccak256(msg);
-
-    return msg;
+    return rlphash(base);
   }
 
   /// Returns the serialized encoding of the EIP-1559 transaction.
   serialize() {
-    List base = this.raw();
-    return TRANSACTION_TYPE_BUFFER + Rlp.encode(base);
+    return Rlp.encode(this.raw());
   }
 
   /// Sign the tx message with [privateKey].
@@ -88,7 +80,7 @@ class Eip1559Transaction {
     var msg = this.getMessageToSign();
     signature.ECDSASignature result = signature.sign(msg, privateKey);
 
-    this.data.v = result.v - 27;
+    this.data.v = result.v + network.chainId * 2 + 8;
     this.data.r = result.r;
     this.data.s = result.s;
 
