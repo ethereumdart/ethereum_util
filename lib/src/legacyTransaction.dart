@@ -30,7 +30,7 @@ class LegacyTransaction {
   /// Returns the serialized unsigned tx (hashed or raw), which can be used.
   /// Return hashed message if [hashMsg] set to true.
   List<int> getMessageToSign() {
-    List<Uint8List> base = this.raw().sublist(0, 6);
+    var base = this.raw().sublist(0, 6);
     base.addAll([
       intToBuffer(network.chainId),
       Uint8List.fromList([]),
