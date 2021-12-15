@@ -69,7 +69,7 @@ class MsgParams {
   }
 }
 
-@JsonSerializable(nullable: true)
+@JsonSerializable()
 class TypedData {
   Map<String, List<TypedDataField>> types;
   String primaryType;
@@ -83,7 +83,7 @@ class TypedData {
   Map<String, dynamic> toJson() => _$TypedDataToJson(this);
 }
 
-@JsonSerializable(nullable: true)
+@JsonSerializable()
 class TypedDataField {
   String name;
   String type;
@@ -95,7 +95,7 @@ class TypedDataField {
   Map<String, dynamic> toJson() => _$TypedDataFieldToJson(this);
 }
 
-@JsonSerializable(nullable: true)
+@JsonSerializable()
 class EIP712Domain {
   String name;
   String version;
