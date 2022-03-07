@@ -8,7 +8,6 @@ import 'package:ethereum_util/src/abi.dart' as ethAbi;
 import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/signature.dart';
 import 'package:ethereum_util/src/utils.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'typed_data.g.dart';
@@ -46,7 +45,7 @@ String _padWithZeroes(String number, int length) {
 }
 
 String normalize(dynamic input) {
-  if (input == null) return null;
+  if (input == null) return '';
   if (!(input is String) && !(input is int)) throw ArgumentError('input must be String or int');
 
   if (input is int) {
@@ -59,24 +58,24 @@ String normalize(dynamic input) {
 
 class MsgParams {
   TypedData data;
-  String sig;
+  String? sig;
 
-  MsgParams({this.data, this.sig});
+  MsgParams({required this.data, this.sig});
 
   Uint8List recoverPublicKey() {
-    var sigParams = fromRpcSig(sig);
+    var sigParams = fromRpcSig(sig!);
     return recoverPublicKeyFromSignature(ECDSASignature(sigParams.r, sigParams.s, sigParams.v), TypedDataUtils.sign(data));
   }
 }
 
 @JsonSerializable()
 class TypedData {
-  Map<String, List<TypedDataField>> types;
+  Map<String, List<TypedDataField>>? types;
   String primaryType;
-  EIP712Domain domain;
+  EIP712Domain? domain;
   Map<String, dynamic> message;
 
-  TypedData({this.types, this.primaryType, this.domain, this.message});
+  TypedData({this.types, required this.primaryType, this.domain, required this.message});
 
   factory TypedData.fromJson(Map<String, dynamic> json) => _$TypedDataFromJson(json);
 
@@ -88,7 +87,7 @@ class TypedDataField {
   String name;
   String type;
 
-  TypedDataField({@required this.name, @required this.type});
+  TypedDataField({required this.name, required this.type});
 
   factory TypedDataField.fromJson(Map<String, dynamic> json) => _$TypedDataFieldFromJson(json);
 
@@ -102,7 +101,7 @@ class EIP712Domain {
   int chainId;
   String verifyingContract;
 
-  EIP712Domain({this.name, this.version, this.chainId, this.verifyingContract});
+  EIP712Domain({required this.name, required this.version, required this.chainId, required this.verifyingContract});
 
   dynamic operator [](String key) {
     switch (key) {
@@ -133,7 +132,7 @@ class TypedDataUtils {
     return sha3(parts.toBytes());
   }
 
-  static Uint8List hashStruct(String primaryType, dynamic data, Map<String, List<TypedDataField>> types) {
+  static Uint8List hashStruct(String primaryType, dynamic data, Map<String, List<TypedDataField>>? types) {
     return sha3(encodeData(primaryType, data, types));
   }
 
@@ -142,17 +141,17 @@ class TypedDataUtils {
     return sha3(Uint8List.fromList(utf8.encode(encodeType(primaryType, types))));
   }
 
-  static Uint8List encodeData(String primaryType, dynamic data, Map<String, List<TypedDataField>> types) {
+  static Uint8List encodeData(String primaryType, dynamic data, Map<String, List<TypedDataField>>? types) {
     if (!(data is Map<String, dynamic>) && !(data is EIP712Domain)) {
       throw ArgumentError('Unsupported data type');
     }
 
-    var encodedTypes = [];
+    List<String> encodedTypes = [];
     encodedTypes.add('bytes32');
     var encodedValues = [];
     encodedValues.add(hashType(primaryType, types));
 
-    types[primaryType].forEach((TypedDataField field) {
+    types![primaryType]!.forEach((TypedDataField field) {
       var value = data[field.name];
       if (value == null) return;
 
@@ -192,7 +191,7 @@ class TypedDataUtils {
     deps.forEach((dep) {
       if (!types.containsKey(dep)) throw new ArgumentError('No type definition specified: ' + dep);
 
-      result += dep + '(' + types[dep].map((field) => field.type + ' ' + field.name).join(',') + ')';
+      result += dep + '(' + types[dep]!.map((field) => field.type + ' ' + field.name).join(',') + ')';
     });
     return result;
   }
@@ -205,15 +204,15 @@ class TypedDataUtils {
    * @param {Array} results - current set of accumulated types
    * @returns {Array} - Set of all types found in the type definition
    */
-  static List<String> findTypeDependencies(String primaryType, Map<String, List<TypedDataField>> types, {List<String> results}) {
+  static List<String> findTypeDependencies(String primaryType, Map<String, List<TypedDataField>> types, {List<String>? results}) {
     if (results == null) results = [];
 
     if (results.indexOf(primaryType) >= 0 || !types.containsKey(primaryType)) return results;
 
     results.add(primaryType);
-    types[primaryType].forEach((TypedDataField field) {
+    types[primaryType]!.forEach((TypedDataField field) {
       findTypeDependencies(field.type, types, results: results).forEach((dep) {
-        if (results.indexOf(dep) == -1) results.add(dep);
+        if (results!.indexOf(dep) == -1) results.add(dep);
       });
     });
     return results;

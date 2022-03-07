@@ -7,19 +7,19 @@ class TxData {
   String to;
   int value;
   String data;
-  int v;
-  BigInt r;
-  BigInt s;
+  int? v;
+  BigInt? r;
+  BigInt? s;
 
   TxData({
-    this.nonce,
-    this.gasLimit,
-    this.maxPriorityFeePerGas,
-    this.maxFeePerGas,
-    this.gasPrice,
-    this.to,
-    this.value,
-    this.data,
+    required this.nonce,
+    required this.gasLimit,
+    this.maxPriorityFeePerGas = 0,
+    this.maxFeePerGas = 0,
+    this.gasPrice = 0,
+    this.to = '',
+    this.value = 0,
+    this.data = '',
     this.v,
     this.r,
     this.s
@@ -29,5 +29,5 @@ class TxData {
 class TxNetwork {
   int chainId;
 
-  TxNetwork({this.chainId});
+  TxNetwork({required this.chainId});
 }

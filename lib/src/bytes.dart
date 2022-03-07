@@ -63,7 +63,7 @@ String unpadString(String a) {
 /// Attempts to turn a value into a [Uint8List]. As input it supports [Uint8List], [String], [int], [null], [BigInt] method.
 Uint8List toBuffer(v) {
   if (!(v is Uint8List)) {
-    if (v is List) {
+    if (v is List<int>) {
       v = Uint8List.fromList(v);
     } else if (v is String) {
       if (utils.isHexString(v)) {

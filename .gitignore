@@ -16,3 +16,6 @@ doc/api/
 
 .idea
 .vscode
+.DS_Store
+
+test.dart

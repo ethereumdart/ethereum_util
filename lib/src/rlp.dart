@@ -38,7 +38,7 @@ Uint8List encodeLength(int length, int offset) {
   ]);
 }
 
-int safeParseInt(String v, [int base]) {
+int safeParseInt(String v, [int base = 10]) {
   if (v.startsWith('00')) throw FormatException('invalid RLP: extra zeros');
 
   return int.parse(v, radix: base);
@@ -51,7 +51,7 @@ class Decoded {
 }
 
 dynamic decode(Uint8List input, [bool stream = false]) {
-  if (input == null || input.length == 0) return <dynamic>[];
+  if (input.length == 0) return <dynamic>[];
 
   Uint8List inputBuffer = _toBuffer(input);
   Decoded decoded = _decode(inputBuffer);

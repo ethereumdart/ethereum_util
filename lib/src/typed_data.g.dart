@@ -8,14 +8,7 @@ part of 'typed_data.dart';
 
 TypedData _$TypedDataFromJson(Map<String, dynamic> json) {
   return TypedData(
-    types: (json['types'] as Map<String, dynamic>)?.map((k, e) => MapEntry(
-      k,
-      (e as List)
-        ?.map((e) => e == null
-            ? null
-            : TypedDataField.fromJson(e as Map<String, dynamic>))
-        ?.toList()
-    )),
+    types: (json['types'] as Map<String, dynamic>).map((k, e) => MapEntry(k, (e as List).map((e) => TypedDataField.fromJson(e as Map<String, dynamic>)).toList())),
     primaryType: json['primaryType'] as String,
     domain: json['domain'] == null ? null : EIP712Domain.fromJson(json['domain'] as Map<String, dynamic>),
     message: json['message'] as Map<String, dynamic>

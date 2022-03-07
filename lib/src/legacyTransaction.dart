@@ -18,9 +18,9 @@ class LegacyTransaction {
       intToBuffer(this.data.nonce),
       intToBuffer(this.data.gasPrice),
       intToBuffer(this.data.gasLimit),
-      this.data.to == null ? Uint8List.fromList([]) : stringToBuffer(this.data.to),
+      stringToBuffer(this.data.to),
       intToBuffer(this.data.value),
-      this.data.data == null ? Uint8List.fromList([]) : stringToBuffer(this.data.data),
+      stringToBuffer(this.data.data),
       this.data.v == null ? Uint8List.fromList([]) : intToBuffer(this.data.v),
       this.data.r == null ? Uint8List.fromList([]) : intToBuffer(this.data.r),
       this.data.s == null ? Uint8List.fromList([]) : intToBuffer(this.data.s)
@@ -40,7 +40,7 @@ class LegacyTransaction {
     return rlphash(base);
   }
 
-  /// Returns the serialized encoding of the EIP-1559 transaction.
+  /// Returns the serialized encoding of the legacy transaction.
   serialize() {
     return Rlp.encode(this.raw());
   }
@@ -48,7 +48,7 @@ class LegacyTransaction {
   /// Sign the tx message with [privateKey].
   sign(Uint8List privateKey) {
     var msg = this.getMessageToSign();
-    signature.ECDSASignature result = signature.sign(msg, privateKey);
+    signature.ECDSASignature result = signature.sign(Uint8List.fromList(msg), privateKey);
 
     this.data.v = result.v + network.chainId * 2 + 8;
     this.data.r = result.r;

@@ -48,7 +48,7 @@ void main() {
     var address = privateKeyToAddress(privateKey);
     var sig = signTypedData(privateKey, MsgParams(data: typedData));
 
-    expect(TypedDataUtils.encodeType('Mail', typedData.types),
+    expect(TypedDataUtils.encodeType('Mail', typedData.types!),
         'Mail(Person from,Person to,string contents)Person(string name,address wallet)');
     expect(bufferToHex(TypedDataUtils.hashType('Mail', typedData.types)),
         '0xa0cedeb2dc280ba39b857546d74f5549c3a1d7bdc2dd96bf881f76108e23dac2');

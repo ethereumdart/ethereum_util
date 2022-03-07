@@ -25,9 +25,9 @@ class Eip1559Transaction {
       intToBuffer(this.data.maxPriorityFeePerGas),
       intToBuffer(this.data.maxFeePerGas),
       intToBuffer(this.data.gasLimit),
-      this.data.to == null ? Uint8List.fromList([]) : stringToBuffer(this.data.to),
+      stringToBuffer(this.data.to),
       intToBuffer(this.data.value),
-      this.data.data == null ? Uint8List.fromList([]) : stringToBuffer(this.data.data),
+      stringToBuffer(this.data.data),
       [],
       this.data.v == null ? [] : intToBuffer(this.data.v),
       this.data.r == null ? [] : intToBuffer(this.data.r),
@@ -55,7 +55,7 @@ class Eip1559Transaction {
   /// Sign the tx message with [privateKey].
   sign(Uint8List privateKey) {
     var msg = this.getMessageToSign();
-    signature.ECDSASignature result = signature.sign(msg, privateKey);
+    signature.ECDSASignature result = signature.sign(Uint8List.fromList(msg), privateKey);
 
     this.data.v = result.v - 27;
     this.data.r = result.r;
