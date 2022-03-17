@@ -24,6 +24,15 @@ class TxData {
     this.r,
     this.s
   });
+
+  set setNonce(int item) => nonce = item;
+  set setGasLimit(int item) => gasLimit = item;
+  set setMaxPriorityFeePerGas(int item) => maxPriorityFeePerGas = item;
+  set setMaxFeePerGas(int item) => maxFeePerGas = item;
+  set setGasPrice(int item) => gasPrice = item;
+  set setTo(String item) => to = item;
+  set setValue(int item) => value = item;
+  set setData(String item) => data = item;
 }
 
 class TxNetwork {
