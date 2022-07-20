@@ -1,8 +1,9 @@
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:ethereum_util/src/bytes.dart' show bufferToInt;
 import 'package:pointycastle/api.dart';
+
+import 'package:ethereum_util/src/bytes.dart' show bufferToInt;
 
 /// Utility to use dart:math's Random class to generate numbers used by pointycastle.
 class DartRandom implements SecureRandom {

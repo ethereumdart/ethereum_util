@@ -1,7 +1,7 @@
 import 'dart:core';
 import 'dart:typed_data';
 
-import 'package:ethereum_util/ethereum_util.dart';
+import 'package:ethereum_util/src/hash.dart';
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 import 'package:ethereum_util/src/signature.dart' as signature;
 import 'package:ethereum_util/src/transaction.dart';

@@ -4,10 +4,6 @@ import 'dart:typed_data';
 import 'package:buffer/buffer.dart';
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:convert/convert.dart';
-import 'package:ethereum_util/src/bigint.dart';
-import 'package:ethereum_util/src/bytes.dart';
-import 'package:ethereum_util/src/hash.dart';
-import 'package:ethereum_util/src/random.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/digests/sha3.dart';
 import 'package:pointycastle/ecc/curves/secp256k1.dart';
@@ -15,6 +11,11 @@ import 'package:pointycastle/key_generators/ec_key_generator.dart';
 import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/pointycastle.dart';
 import 'package:pointycastle/signers/ecdsa_signer.dart';
+
+import 'package:ethereum_util/src/bigint.dart';
+import 'package:ethereum_util/src/bytes.dart';
+import 'package:ethereum_util/src/hash.dart';
+import 'package:ethereum_util/src/random.dart';
 
 final ECDomainParameters params = ECCurve_secp256k1();
 final BigInt _halfCurveOrder = params.n ~/ BigInt.two;

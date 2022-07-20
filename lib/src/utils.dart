@@ -20,7 +20,7 @@ String padToEven(String value) {
   ArgumentError.checkNotNull(value);
 
   var a = '$value';
-  if (a.length % 2 == 1) a = "0${a}";
+  if (a.length % 2 == 1) a = '0${a}';
 
   return a;
 }

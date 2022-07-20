@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
+import 'package:test/test.dart';
+
 import 'package:ethereum_util/src/bigint.dart';
 import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/signature.dart' as signature;
-import 'package:test/test.dart';
 
 var echash = hex.decode('82ff40c0a986c6a5cfad4ddf4c3aa6996f1a7837f9c398e17e5de5cbd5a12b28');
 var ecprivkey = hex.decode('3c9229289a6125f7fdf1885a77bb12c37a8d3b4962d936f7e3084dece32a3ca1');
@@ -14,33 +15,23 @@ void main() {
   group('sign', () {
     test('should produce a signature', () {
       var sig = signature.sign(Uint8List.fromList(echash), Uint8List.fromList(ecprivkey));
-      expect(
-          encodeBigInt(sig.r),
-          hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
-      expect(
-          encodeBigInt(sig.s),
-          hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
+      expect(encodeBigInt(sig.r), hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
+      expect(encodeBigInt(sig.s), hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       expect(sig.v, 27);
     });
 
     test('should produce a signature for Ropsten testnet', () {
       var sig = signature.sign(Uint8List.fromList(echash), Uint8List.fromList(ecprivkey), chainId: ropstenChainId);
-      expect(
-          encodeBigInt(sig.r),
-          hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
-      expect(
-          encodeBigInt(sig.s),
-          hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
+      expect(encodeBigInt(sig.r), hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
+      expect(encodeBigInt(sig.s), hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       expect(sig.v, 41);
     });
   });
 
   group('recoverPublicKeyFromSignature', () {
     test('should recover a public key', () {
-      var r = decodeBigInt(hex.decode(
-          '99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
-      var s = decodeBigInt(hex.decode(
-          '129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
+      var r = decodeBigInt(hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
+      var s = decodeBigInt(hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 27;
       var pubKey = signature.recoverPublicKeyFromSignature(signature.ECDSASignature(r, s, v), Uint8List.fromList(echash));
       expect(pubKey, signature.privateKeyToPublicKey(Uint8List.fromList(ecprivkey)));
@@ -58,30 +49,21 @@ void main() {
       var r = decodeBigInt(hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
       var s = decodeBigInt(hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 21;
-      expect(
-          () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)),
-          throwsArgumentError);
+      expect(() => signature.recoverPublicKeyFromSignature(signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)), throwsArgumentError);
     });
 
     test('should fail on an invalid signature (v = 29)', () {
       var r = decodeBigInt(hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
       var s = decodeBigInt(hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 29;
-      expect(
-        () => signature.recoverPublicKeyFromSignature(signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)),
-        throwsArgumentError);
+      expect(() => signature.recoverPublicKeyFromSignature(signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)), throwsArgumentError);
     });
 
     test('should fail on an invalid signature (swapped points)', () {
-      var r = decodeBigInt(hex.decode(
-          '99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
-      var s = decodeBigInt(hex.decode(
-          '129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
+      var r = decodeBigInt(hex.decode('99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9'));
+      var s = decodeBigInt(hex.decode('129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 27;
-      expect(
-          () => signature.recoverPublicKeyFromSignature(signature.ECDSASignature(s, r, v), Uint8List.fromList(echash)),
-          throwsArgumentError);
+      expect(() => signature.recoverPublicKeyFromSignature(signature.ECDSASignature(s, r, v), Uint8List.fromList(echash)), throwsArgumentError);
     });
   });
 
@@ -153,31 +135,26 @@ void main() {
       const v = 27;
       expect(signature.toRpcSig(r, s, v), '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b');
       expect(
-          signature.fromRpcSig(
-              '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b'),
-          signature.ECDSASignature(r, s, v));
+        signature.fromRpcSig( '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b').toString(),
+        signature.ECDSASignature(r, s, v).toString()
+      );
       expect(
-          signature.fromRpcSig(
-              '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca6600'),
-          signature.ECDSASignature(r, s, v));
+        signature.fromRpcSig('0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca6600').toString(),
+        signature.ECDSASignature(r, s, v).toString()
+      );
     });
 
     test('should throw on invalid length', () {
       expect(() => signature.fromRpcSig(''), throwsArgumentError);
-      expect(
-          () => signature.fromRpcSig(
-              '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca660042'),
-          throwsArgumentError);
+      expect(() => signature.fromRpcSig('0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca660042'), throwsArgumentError);
     });
 
     test('pad short r and s values', () {
       const v = 27;
       expect(
-          signature.toRpcSig(
-              decodeBigInt(Uint8List.view(encodeBigInt(r).buffer, 20)),
-              decodeBigInt(Uint8List.view(encodeBigInt(s).buffer, 20)),
-              v),
-          '0x00000000000000000000000000000000000000004a1579cf389ef88b20a1abe90000000000000000000000000000000000000000326fa689f228040429e3ca661b');
+        signature.toRpcSig(decodeBigInt(Uint8List.view(encodeBigInt(r).buffer, 20)), decodeBigInt(Uint8List.view(encodeBigInt(s).buffer, 20)), v),
+        '0x00000000000000000000000000000000000000004a1579cf389ef88b20a1abe90000000000000000000000000000000000000000326fa689f228040429e3ca661b'
+      );
     });
 
     test('should throw on invalid v value', () {

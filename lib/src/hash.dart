@@ -1,8 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:pointycastle/pointycastle.dart';
+
 import 'package:ethereum_util/src/bytes.dart' as bytes;
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
-import 'package:pointycastle/pointycastle.dart';
 
 /// Creates Keccak hash of the input
 Uint8List keccak(dynamic a, {int bits: 256}) {
@@ -35,6 +36,5 @@ Uint8List ripemd160(dynamic a, {bool padded: false}) {
 
 /// Creates SHA-3 hash of the RLP encoded version of the input.
 Uint8List rlphash(dynamic a) {
-  // a = bytes.toBuffer(a);
   return keccak(Rlp.encode(a));
 }

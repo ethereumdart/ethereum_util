@@ -2,8 +2,9 @@ import 'dart:convert' show utf8;
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
-import 'package:ethereum_util/ethereum_util.dart';
-import 'package:ethereum_util/src/utils.dart' show intToBuffer, isHexString, padToEven, stripHexPrefix;
+
+import 'package:ethereum_util/src/bigint.dart';
+import 'package:ethereum_util/src/utils.dart';
 
 // Copy and pasted from the rlp nodejs library, translated to dart on a best-effort basis.
 Uint8List encode(dynamic input) {
@@ -15,15 +16,12 @@ Uint8List encode(dynamic input) {
 
     final data = _concat(output);
     return _concat([encodeLength(data.length, 192), data]);
-  } else {
-    final data = _toBuffer(input);
-
-    if (data.length == 1 && data[0] < 128) {
-      return data;
-    } else {
-      return _concat([encodeLength(data.length, 128), data]);
-    }
   }
+
+  final data = _toBuffer(input);
+  if (data.length == 1 && data[0] < 128) return data;
+
+  return _concat([encodeLength(data.length, 128), data]);
 }
 
 Uint8List encodeLength(int length, int offset) {
@@ -64,12 +62,12 @@ dynamic decode(Uint8List input, [bool stream = false]) {
 
 Decoded _decode(Uint8List input) {
   int firstByte = input[0];
-  if (firstByte <= 0x7f) {
-    // a single byte whose value is in the [0x00, 0x7f] range, that byte is its own RLP encoding.
-    return Decoded(input.sublist(0, 1), input.sublist(1));
-  } else if (firstByte <= 0xb7) {
-    // string is 0-55 bytes long. A single byte with value 0x80 plus the length of the string followed by the string
-    // The range of the first byte is [0x80, 0xb7]
+
+  // a single byte whose value is in the [0x00, 0x7f] range, that byte is its own RLP encoding.
+  if (firstByte <= 0x7f) return Decoded(input.sublist(0, 1), input.sublist(1));
+
+  if (firstByte <= 0xb7) {
+    // string is 0-55 bytes long. A single byte with value 0x80 plus the length of the string followed by the string The range of the first byte is [0x80, 0xb7]
     int length = firstByte - 0x7f;
 
     // set 0x80 null to 0
@@ -78,14 +76,18 @@ Decoded _decode(Uint8List input) {
     if (length == 2 && data[0] < 0x80) throw FormatException('invalid rlp encoding: byte must be less 0x80');
 
     return Decoded(data, input.sublist(length));
-  } else if (firstByte <= 0xbf) {
+  }
+
+  if (firstByte <= 0xbf) {
     int llength = firstByte - 0xb6;
     int length = safeParseInt(hex.encode(input.sublist(1, llength)), 16);
     Uint8List data = input.sublist(llength, length + llength);
     if (data.length < length) throw FormatException('invalid RLP');
 
     return Decoded(data, input.sublist(length + llength));
-  } else if (firstByte <= 0xf7) {
+  }
+
+  if (firstByte <= 0xf7) {
     // a list between  0-55 bytes long
     List<dynamic> decoded = <dynamic>[];
     int length = firstByte - 0xbf;
@@ -97,26 +99,25 @@ Decoded _decode(Uint8List input) {
     }
 
     return Decoded(decoded, input.sublist(length));
-  } else {
-    // a list  over 55 bytes long
-    List<dynamic> decoded = <dynamic>[];
-    int llength = firstByte - 0xf6;
-    int length = safeParseInt(hex.encode(input.sublist(1, llength)), 16);
-    int totalLength = llength + length;
-    if (totalLength > input.length) {
-      throw FormatException('invalid rlp: total length is larger than the data');
-    }
-
-    Uint8List innerRemainder = input.sublist(llength, totalLength);
-    if (innerRemainder.length == 0) throw FormatException('invalid rlp, List has a invalid length');
-
-    while (innerRemainder.length > 0) {
-      Decoded d = _decode(innerRemainder);
-      decoded.add(d.data);
-      innerRemainder = d.remainder;
-    }
-    return Decoded(decoded, input.sublist(totalLength));
   }
+  // a list  over 55 bytes long
+  List<dynamic> decoded = <dynamic>[];
+  int llength = firstByte - 0xf6;
+  int length = safeParseInt(hex.encode(input.sublist(1, llength)), 16);
+  int totalLength = llength + length;
+  if (totalLength > input.length) {
+    throw FormatException('invalid rlp: total length is larger than the data');
+  }
+
+  Uint8List innerRemainder = input.sublist(llength, totalLength);
+  if (innerRemainder.length == 0) throw FormatException('invalid rlp, List has a invalid length');
+
+  while (innerRemainder.length > 0) {
+    Decoded d = _decode(innerRemainder);
+    decoded.add(d.data);
+    innerRemainder = d.remainder;
+  }
+  return Decoded(decoded, input.sublist(totalLength));
 }
 
 Uint8List _concat(List<Uint8List> lists) {
@@ -135,22 +136,25 @@ Uint8List _toBuffer(dynamic data) {
   if (data is Uint8List) return data;
 
   if (data is String) {
-    if (isHexString(data)) {
-      return Uint8List.fromList(hex.decode(padToEven(stripHexPrefix(data))));
-    } else {
-      return Uint8List.fromList(utf8.encode(data));
-    }
-  } else if (data is int) {
+    if (isHexString(data)) return Uint8List.fromList(hex.decode(padToEven(stripHexPrefix(data))));
+
+    return Uint8List.fromList(utf8.encode(data));
+
+  }
+
+  if (data is int) {
     if (data == 0) return Uint8List(0);
 
     return Uint8List.fromList(intToBuffer(data));
-  } else if (data is BigInt) {
+  }
+
+  if (data is BigInt) {
     if (data == BigInt.zero) return Uint8List(0);
 
     return Uint8List.fromList(encodeBigInt(data));
-  } else if (data is List<int>) {
-    return Uint8List.fromList(data);
   }
+
+  if (data is List<int>) return Uint8List.fromList(data);
 
   throw TypeError();
 }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:buffer/buffer.dart';
 import 'package:convert/convert.dart' show hex;
+
 import 'package:ethereum_util/src/bigint.dart';
 import 'package:ethereum_util/src/bytes.dart';
 import 'package:ethereum_util/src/hash.dart';
@@ -205,6 +206,5 @@ bool isArray(String type) {
 
 /// Is a type dynamic?
 bool isDynamic(String type) {
-  // FIXME: handle all types? I don't think anything is missing now
   return type == 'string' || type == 'bytes' || parseTypeArray(type) == 'dynamic';
 }

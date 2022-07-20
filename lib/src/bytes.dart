@@ -2,6 +2,7 @@ import 'dart:convert' show utf8, jsonEncode;
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
+
 import 'package:ethereum_util/src/bigint.dart';
 import 'package:ethereum_util/src/utils.dart' as utils;
 
@@ -22,13 +23,13 @@ Uint8List setLengthLeft(Uint8List msg, int length, {bool right = false}) {
       return buf;
     }
     return msg.sublist(0, length);
-  } else {
-    if (msg.length < length) {
-      buf.setAll(length - msg.length, msg);
-      return buf;
-    }
-    return msg.sublist(msg.length - length);
   }
+
+  if (msg.length < length) {
+    buf.setAll(length - msg.length, msg);
+    return buf;
+  }
+  return msg.sublist(msg.length - length);
 }
 
 Uint8List setLength(Uint8List msg, int length, {bool right = false}) {
@@ -116,9 +117,9 @@ baToJSON(ba) {
 }
 
 _baToJSON(ba) {
-  if (ba is Uint8List) {
-    return "0x${hex.encode(ba)}";
-  } else if (ba is List) {
+  if (ba is Uint8List) return "0x${hex.encode(ba)}";
+
+  if (ba is List) {
     var result = [];
     ba.forEach((x) => result.add(_baToJSON(x)));
     return result;

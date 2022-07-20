@@ -28,12 +28,10 @@ Uint8List encodeBigInt(BigInt input, {Endian endian = Endian.be, int length = 0}
     }
     return res;
   } else {
-    // FIXME: le
     throw UnimplementedError('little-endian is not supported');
   }
 }
 
 enum Endian {
-  be,
-  // FIXME: le
+  be
 }
