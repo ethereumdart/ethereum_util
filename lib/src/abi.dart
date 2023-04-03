@@ -4,10 +4,10 @@ import 'dart:typed_data';
 import 'package:buffer/buffer.dart';
 import 'package:convert/convert.dart' show hex;
 
-import 'package:ethereum_util/src/bigint.dart';
-import 'package:ethereum_util/src/bytes.dart';
-import 'package:ethereum_util/src/hash.dart';
-import 'package:ethereum_util/src/utils.dart' as utils;
+import 'package:ethereum_util/src/utils/bigint.dart';
+import 'package:ethereum_util/src/utils/bytes.dart';
+import 'package:ethereum_util/src/utils/hash.dart';
+import 'package:ethereum_util/src/utils/utils.dart' as utils;
 
 Uint8List eventID(String name, List<String> types) {
   String sig = '$name(${types.map(elementaryName).join(',')})';

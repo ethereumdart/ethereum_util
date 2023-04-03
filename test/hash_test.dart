@@ -1,7 +1,7 @@
 import 'package:convert/convert.dart' show hex;
 import 'package:test/test.dart';
 
-import 'package:ethereum_util/src/hash.dart' as hash;
+import 'package:ethereum_util/src/utils/hash.dart' as hash;
 
 void main() {
   const msg = '0x3c9229289a6125f7fdf1885a77bb12c37a8d3b4962d936f7e3084dece32a3ca1';

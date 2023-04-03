@@ -1,7 +1,7 @@
 import 'package:convert/convert.dart' show hex;
 import 'package:test/test.dart';
 
-import 'package:ethereum_util/src/utils.dart' as util;
+import 'package:ethereum_util/src/utils/utils.dart' as util;
 
 void main() {
   group('utils', () {

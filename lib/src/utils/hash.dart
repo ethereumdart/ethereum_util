@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:pointycastle/pointycastle.dart';
 
-import 'package:ethereum_util/src/bytes.dart' as bytes;
+import 'package:ethereum_util/src/utils/bytes.dart' as bytes;
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 
 /// Creates Keccak hash of the input

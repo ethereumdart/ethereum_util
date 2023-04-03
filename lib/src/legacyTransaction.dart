@@ -1,11 +1,11 @@
 import 'dart:core';
 import 'dart:typed_data';
 
-import 'package:ethereum_util/src/hash.dart';
+import 'package:ethereum_util/src/utils/hash.dart';
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 import 'package:ethereum_util/src/signature.dart' as signature;
 import 'package:ethereum_util/src/transaction.dart';
-import 'package:ethereum_util/src/utils.dart';
+import 'package:ethereum_util/src/utils/utils.dart';
 
 class LegacyTransaction {
   TxData data;

@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
 
-import 'package:ethereum_util/src/bigint.dart';
-import 'package:ethereum_util/src/utils.dart';
+import 'package:ethereum_util/src/utils/bigint.dart';
+import 'package:ethereum_util/src/utils/utils.dart';
 
 // Copy and pasted from the rlp nodejs library, translated to dart on a best-effort basis.
 Uint8List encode(dynamic input) {

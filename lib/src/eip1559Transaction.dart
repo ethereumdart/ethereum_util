@@ -3,11 +3,11 @@ import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
 
-import 'package:ethereum_util/src/hash.dart';
+import 'package:ethereum_util/src/utils/hash.dart';
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 import 'package:ethereum_util/src/signature.dart' as signature;
 import 'package:ethereum_util/src/transaction.dart';
-import 'package:ethereum_util/src/utils.dart';
+import 'package:ethereum_util/src/utils/utils.dart';
 
 int TRANSACTION_TYPE = 2;
 Uint8List TRANSACTION_TYPE_BUFFER = Uint8List.fromList(hex.decode(TRANSACTION_TYPE.toRadixString(16).padLeft(2, '0')));

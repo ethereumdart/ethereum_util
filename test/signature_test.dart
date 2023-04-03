@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart' show hex;
 import 'package:test/test.dart';
 
-import 'package:ethereum_util/src/bigint.dart';
-import 'package:ethereum_util/src/bytes.dart';
+import 'package:ethereum_util/src/utils/bigint.dart';
+import 'package:ethereum_util/src/utils/bytes.dart';
 import 'package:ethereum_util/src/signature.dart' as signature;
 
 var echash = hex.decode('82ff40c0a986c6a5cfad4ddf4c3aa6996f1a7837f9c398e17e5de5cbd5a12b28');

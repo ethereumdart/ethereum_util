@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart' show hex;
 import 'package:test/test.dart';
 
-import 'package:ethereum_util/src/bytes.dart';
+import 'package:ethereum_util/src/utils/bytes.dart';
 
 void main() {
   group('bytes', () {

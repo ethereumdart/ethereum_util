@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
 
-import 'package:ethereum_util/src/bigint.dart';
-import 'package:ethereum_util/src/utils.dart' as utils;
+import 'package:ethereum_util/src/utils/bigint.dart';
+import 'package:ethereum_util/src/utils/utils.dart' as utils;
 
 /// Returns a buffer filled with 0s.
 Uint8List zeros(int bytes) {
