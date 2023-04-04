@@ -34,7 +34,12 @@ class SignatureUtil {
 
   static String signToCompact({required Uint8List message, required Uint8List privateKey}) {
     final sig = signToSignature(message, privateKey);
-    return concatSigCompact(toBuffer(sig.r), toBuffer(sig.s));
+    final recoveryParam = 1 - sig.v % 2;
+
+    final s = toBuffer(sig.s);
+    if (recoveryParam > 0) s[0] |= 0x80;
+
+    return concatSigCompact(toBuffer(sig.r), s);
   }
 
   static ECDSASignature signToSignature(Uint8List message, Uint8List privateKey) {
