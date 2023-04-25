@@ -5,7 +5,7 @@ class TxData {
   int maxFeePerGas;
   int gasPrice;
   String to;
-  int value;
+  BigInt value;
   String data;
   int? v;
   BigInt? r;
@@ -18,7 +18,7 @@ class TxData {
     this.maxFeePerGas = 0,
     this.gasPrice = 0,
     this.to = '',
-    this.value = 0,
+    required this.value,
     this.data = '',
     this.v,
     this.r,
@@ -31,7 +31,7 @@ class TxData {
   set setMaxFeePerGas(int item) => maxFeePerGas = item;
   set setGasPrice(int item) => gasPrice = item;
   set setTo(String item) => to = item;
-  set setValue(int item) => value = item;
+  set setValue(BigInt item) => value = item;
   set setData(String item) => data = item;
 }
 
