@@ -34,7 +34,7 @@ String intToHex(i) {
 
 /// Converts an [int] or [BigInt] to a [Uint8List]
 Uint8List intToBuffer(i) {
-  return Uint8List.fromList(i == null || i == 0 ? [] : hex.decode(padToEven(intToHex(i).substring(2))));
+  return Uint8List.fromList(i == null || i == 0 || i == BigInt.zero ? [] : hex.decode(padToEven(intToHex(i).substring(2))));
 }
 
 Uint8List stringToBuffer(String i) {
