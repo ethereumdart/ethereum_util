@@ -13,15 +13,15 @@ Future<Uint8List> mnemonicToSuiSeedByte(String mnemonic) async {
   return Uint8List.fromList(seedNum.key);
 }
 
-/// Generates new Pair key by seed
-SigningKey generateNewPairKey(Uint8List seed) {
-  return SigningKey.fromSeed(seed);
+/// Generates new Pair key by privateKey
+SigningKey generateNewPairKeyBySeed(Uint8List privateKey) {
+  return SigningKey.fromSeed(privateKey);
 }
 
 /// Generates new Pair key by mnemonic
 Future<SigningKey> generateSuiPairKey(String mnemonic) async {
   final seed = await mnemonicToSuiSeedByte(mnemonic);
-  return generateNewPairKey(seed);
+  return generateNewPairKeyBySeed(seed);
 }
 
 /// Constructs public key to Black2bHash
@@ -53,4 +53,17 @@ String publicKeyToSuiAddress(AsymmetricPublicKey publicKey) {
 Future<String> mnemonicToSuiAddress(String mnemonic) async {
   final signature = await generateSuiPairKey(mnemonic);
   return publicKeyToSuiAddress(signature.publicKey);
+}
+
+/// pure Ed25519 signature
+SignedMessage suiSignatureFromSeed(Uint8List message, Uint8List privateKey) {
+  SigningKey signingKey = generateNewPairKeyBySeed(privateKey);
+  return signingKey.sign(message);
+}
+
+bool suiVerifySignedMessage(Uint8List publicKey, SignedMessage signedMessage) {
+  VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
+  return verifyKey.verify(
+      signature: signedMessage.signature,
+      message: Uint8List.fromList(signedMessage.message));
 }
