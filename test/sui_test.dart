@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:test/test.dart';
 import 'package:pinenacl/ed25519.dart';
@@ -26,6 +27,7 @@ void main() {
   });
 
   group('test signature transition', () {
+    // https://suiexplorer.com/txblock/EqmzdPhCjDrLKsgUCT5VCuP2VKywCRiqEzao4aTVPxnK
     final message =
         '6fce5974ae960a8b5d32c2b073aac191d66cdd96346595b1378c8a0b7467d005';
     Uint8List messageList = Uint8List.fromList(hex.decode(message));
@@ -34,10 +36,15 @@ void main() {
     Uint8List keyList = Uint8List.fromList(hex.decode(privateKey));
     late final signingKey = sui.generateNewPairKeyBySeed(keyList);
     late final signedMessage;
+    String publicKeyBase = 'AOePYHlJ75+ruWFS+Aqa5LGeCsbQhse71vNPru6Oxb/s';
+    Uint8List publicKeyRaw = base64.decode(publicKeyBase);
+    Uint8List publicKey = publicKeyRaw.sublist(1, publicKeyRaw.length);
 
+    // String signatureBase =
+    //     'crHI/Y+bCOfVBw7BDHWOjvGAbEBk2jdbQaOd72CrJhsxymPCXayEKTDaOHB+T16lULwA8I5gVgLn1/JXRn28Bg==';
+    // Uint8List signatureRaw = base64.decode(signatureBase);
     test('by private key', () {
-      expect(hex.encode(signingKey.publicKey),
-          'e78f607949ef9fabb96152f80a9ae4b19e0ac6d086c7bbd6f34faeee8ec5bfec');
+      expect(signingKey.publicKey, publicKey);
       signedMessage = sui.suiSignatureFromSeed(messageList, keyList);
       expect(hex.encode(signedMessage.signature),
           'efdae4a66a3764ba4fee4b540dace1bff912b94193742b5ffc24a9d384551ea8b080d1b0a0087c77a849bd4d1f909e1fb582a3a2cc4051b4e20f7e484c35570b');
