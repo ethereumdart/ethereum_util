@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
-import 'package:pointycastle/pointycastle.dart';
 import 'package:test/test.dart';
 
 import 'package:ethereum_util/src/utils/bigint.dart';

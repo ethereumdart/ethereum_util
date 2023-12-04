@@ -5,13 +5,9 @@ import 'package:convert/convert.dart';
 import 'package:ethereum_util/ethereum_util.dart';
 import 'package:test/test.dart';
 
-import 'package:ethereum_util/src/typed_data/constants.dart';
 import 'package:ethereum_util/src/typed_data/models.dart';
-import 'package:ethereum_util/src/typed_data/typed_data.dart';
 import 'package:ethereum_util/src/typed_data/util.dart';
 import 'package:ethereum_util/src/typed_data/signature.dart';
-import 'package:ethereum_util/src/utils/bigint.dart';
-import 'package:ethereum_util/src/signature.dart' as signature;
 
 void main() {
   const privateKey =
@@ -108,7 +104,7 @@ void main() {
     test('signPersonalMessage', () {
       final result = SignatureUtil.signPersonalMessage(
           message: message, privateKey: privateKey);
-      expect(result!.length, 132);
+      expect(result.length, 132);
     });
 
     test('signToCompact', () {
