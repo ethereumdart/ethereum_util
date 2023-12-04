@@ -50,10 +50,12 @@ void main() {
           'efdae4a66a3764ba4fee4b540dace1bff912b94193742b5ffc24a9d384551ea8b080d1b0a0087c77a849bd4d1f909e1fb582a3a2cc4051b4e20f7e484c35570b');
     });
 
-    // test('verify signature', () async {
-    //   final result = sui.suiVerifySignedMessage(
-    //       Uint8List.fromList(signingKey.publicKey), signedMessage);
-    //   assert(result);
-    // });
+    test('verify signature', () async {
+      final signedMessage =
+          sui.suiSignatureFromSeedReturnRaw(messageList, keyList);
+      final result = sui.suiVerifySignedMessage(
+          Uint8List.fromList(signingKey.publicKey), signedMessage);
+      assert(result);
+    });
   });
 }

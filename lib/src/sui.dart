@@ -69,9 +69,9 @@ SignedMessage suiSignatureFromSeedReturnRaw(
   return signingKey.sign(message);
 }
 
-// bool suiVerifySignedMessage(Uint8List publicKey, SignedMessage signedMessage) {
-//   VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
-//   return verifyKey.verify(
-//       signature: signedMessage.signature,
-//       message: Uint8List.fromList(signedMessage.message));
-// }
+bool suiVerifySignedMessage(Uint8List publicKey, SignedMessage signedMessage) {
+  VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
+  return verifyKey.verify(
+      signature: signedMessage.signature,
+      message: Uint8List.fromList(signedMessage.message));
+}
