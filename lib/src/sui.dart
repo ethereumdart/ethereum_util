@@ -2,6 +2,7 @@ import 'package:bip39/bip39.dart' as bip39;
 import "package:ed25519_hd_key/ed25519_hd_key.dart";
 import 'package:pointycastle/digests/blake2b.dart';
 import 'package:pinenacl/ed25519.dart';
+import 'package:convert/convert.dart' show hex;
 
 const SUI_ADDRESS_LENGTH = 32;
 
@@ -56,14 +57,21 @@ Future<String> mnemonicToSuiAddress(String mnemonic) async {
 }
 
 /// pure Ed25519 signature
-SignedMessage suiSignatureFromSeed(Uint8List message, Uint8List privateKey) {
+String suiSignatureFromSeed(Uint8List message, Uint8List privateKey) {
+  SigningKey signingKey = generateNewPairKeyBySeed(privateKey);
+  SignedMessage signedMessage = signingKey.sign(message);
+  return hex.encode(signedMessage.signature);
+}
+
+SignedMessage suiSignatureFromSeedReturnRaw(
+    Uint8List message, Uint8List privateKey) {
   SigningKey signingKey = generateNewPairKeyBySeed(privateKey);
   return signingKey.sign(message);
 }
 
-bool suiVerifySignedMessage(Uint8List publicKey, SignedMessage signedMessage) {
-  VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
-  return verifyKey.verify(
-      signature: signedMessage.signature,
-      message: Uint8List.fromList(signedMessage.message));
-}
+// bool suiVerifySignedMessage(Uint8List publicKey, SignedMessage signedMessage) {
+//   VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
+//   return verifyKey.verify(
+//       signature: signedMessage.signature,
+//       message: Uint8List.fromList(signedMessage.message));
+// }
