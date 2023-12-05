@@ -18,16 +18,21 @@ void main() {
 
       /// mnemonic to private key
       final privateKey = await sui.mnemonicToSuiSeedByte(TEST_MNEMONIC);
+      expect(hex.encode(privateKey),
+          '729215013d83ae9ee5058ea8c9e263dd6dc62df13272cddc2082b63187fcb966');
 
       /// private key to key pair
       final signingKey = sui.generateNewPairKeyBySeed(privateKey);
       final message =
-          '6fce5974ae960a8b5d32c2b073aac191d66cdd96346595b1378c8a0b7467d005';
+          'ef80aa12944ed4ddfbd701afc5117865784de618afb64d2f29ecaeb95e6ebe43';
       Uint8List messageList = Uint8List.fromList(hex.decode(message));
 
       /// sign message
       final signedMessage =
           sui.suiSignatureFromSeedReturnRaw(messageList, privateKey);
+      final signMessageHash = sui.suiSignatureFromSeed(messageList, privateKey);
+      print(signedMessage.signature);
+      expect(hex.encode(signedMessage.signature), signMessageHash);
       final result = sui.suiVerifySignedMessage(
           Uint8List.fromList(signingKey.publicKey), signedMessage);
       assert(result);
