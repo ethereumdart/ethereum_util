@@ -15,6 +15,22 @@ void main() {
       final String address = await sui.mnemonicToSuiAddress(TEST_MNEMONIC);
       expect(address,
           '0x4fc033d8edde03af8ec50746b437ffd6292c13f5334bbdbc4c87f8d6d691a70b');
+
+      /// mnemonic to private key
+      final privateKey = await sui.mnemonicToSuiSeedByte(TEST_MNEMONIC);
+
+      /// private key to key pair
+      final signingKey = sui.generateNewPairKeyBySeed(privateKey);
+      final message =
+          '6fce5974ae960a8b5d32c2b073aac191d66cdd96346595b1378c8a0b7467d005';
+      Uint8List messageList = Uint8List.fromList(hex.decode(message));
+
+      /// sign message
+      final signedMessage =
+          sui.suiSignatureFromSeedReturnRaw(messageList, privateKey);
+      final result = sui.suiVerifySignedMessage(
+          Uint8List.fromList(signingKey.publicKey), signedMessage);
+      assert(result);
     });
 
     test(' mnemonic 24', () async {
