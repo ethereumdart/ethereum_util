@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'dart:convert';
 
+import 'package:ethereum_util/ethereum_util.dart';
+import 'package:substrate_bip39/substrate_bip39.dart';
 import 'package:test/test.dart';
 import 'package:pinenacl/ed25519.dart';
 import 'package:convert/convert.dart' show hex;
@@ -30,29 +32,23 @@ void main() {
     });
   });
 
-  // group('test signature transition', () {
-  //   late final signedMessage;
-  //   // final privateKey =
-  //   //     'de71be0feb95ac763f71ab4b70c537be89af2549eb8ce1d3eca3115a48c5bd3f';
-  //   final privateKey = 'cb6564854374eac1818e2b909d8a1c742c547d6beb63a92a1edc7059d7fcf2f2';
-  //   final publicKey =
-  //       dot.privateKeyToPublicKey(Uint8List.fromList(hex.decode(privateKey)));
-  //   print(dot.publicKeyToAddress(publicKey));
-  //   final message = '9c0500009ea0acfa4a4b5a19c512df75afc9b1d5a9e1a1acf872018f956c8526e11efa00028907005501080041420f001800000091b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c356fa869e599cbc6629faa39a70e318b0cadde91ad50c4fb8cdb6fe74010b4f9e';
+  group('test signature transition', () {
+    const mnemonic =
+        'asset mix describe spare brand renew siege twelve toilet stairs stomach scrap';
+    late final signedMessage;
+    late final privateKey;
+    late final publicKey;
 
+    final message =
+        '0500009ea0acfa4a4b5a19c512df75afc9b1d5a9e1a1acf872018f956c8526e11efa00028907003500140041420f001800000091b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3bd44f5a7b303737a78347cc54297aec16442b91f9db5f074027d152ac4d80c68';
 
-  //   test('by private key', () {
-    
-  //     final keyBytes = Uint8List.fromList(hex.decode(privateKey));
-  //     final messageBytes = Uint8List.fromList(hex.decode(message));
-  //     signedMessage = dot.signature(messageBytes, keyBytes);
-  //     // expect(signedMessage,
-  //     //     'efdae4a66a3764ba4fee4b540dace1bff912b94193742b5ffc24a9d384551ea8b080d1b0a0087c77a849bd4d1f909e1fb582a3a2cc4051b4e20f7e484c35570b');
-  //   });
-
-  //   test('verify signature', () async {
-  //     final result =
-  //         dot.verifySignedMessage(publicKey, signedMessage, 'message');
-  //   });
-  // });
+    test('by private key', () async {
+      privateKey = await dot.mnemonicToPrivateKey(mnemonic);
+      publicKey = dot.privateKeyToPublicKey(privateKey);
+      final messageBytes = Uint8List.fromList(hex.decode(message));
+      signedMessage = dot.signature(messageBytes, privateKey);
+      var result = dot.verifySignedMessage(publicKey, signedMessage, message);
+      assert(result);
+    });
+  });
 }
