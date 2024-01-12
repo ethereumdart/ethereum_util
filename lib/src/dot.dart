@@ -45,11 +45,11 @@ class Dot {
     return publicKeyToAddress(publicKey, prefix: prefix);
   }
 
-  static String signature(Uint8List message, Uint8List privateKey) {
+  static String signature(dynamic message, Uint8List privateKey) {
+    final msg = processMessage(message);
     final MiniSecretKey priv = MiniSecretKey.fromHex(hex.encode(privateKey));
     var sk = priv.expandEd25519();
-    final transcript =
-        Sr25519.newSigningContext(utf8.encode('substrate'), message);
+    final transcript = Sr25519.newSigningContext(utf8.encode('substrate'), msg);
     final signature = sk.sign(transcript);
     return hex.encode(signature.encode());
   }
@@ -62,4 +62,25 @@ class Dot {
         pubKey, signature, Uint8List.fromList(hex.decode(message)));
     return result.$1;
   }
+}
+
+/// delete message prefix 0x9c
+Uint8List processMessage(dynamic message) {
+  late final Uint8List msg;
+  final isString = message is String;
+  final isBytes = message is Uint8List;
+  if (!isString && !isBytes) throw new Exception('Unsupported message type');
+  if (isString) {
+    String messageNo0x = message;
+    if (message.startsWith('0x')) {
+      // delete 0x
+      messageNo0x = message.substring('0x'.length);
+    }
+    msg = Uint8List.fromList(hex.decode(messageNo0x));
+  } else {
+    msg = message;
+  }
+  // delete prefix 9c
+  if (msg[0] == 156) return msg.sublist(1);
+  return msg;
 }
