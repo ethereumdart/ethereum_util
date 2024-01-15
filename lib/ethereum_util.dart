@@ -9,6 +9,7 @@ export 'package:ethereum_util/src/rlp.dart';
 export 'package:ethereum_util/src/signature.dart';
 export 'package:ethereum_util/src/dot.dart';
 export 'package:ethereum_util/src/sui.dart';
+export 'package:ethereum_util/src/xrp.dart';
 export 'package:ethereum_util/src/transaction.dart';
 export 'package:ethereum_util/src/typed_data/constants.dart';
 export 'package:ethereum_util/src/typed_data/typed_data.dart';
