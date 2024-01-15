@@ -3,21 +3,21 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-import 'package:ethereum_util/src/xrp.dart' as xrp;
+import 'package:ethereum_util/ethereum_util.dart';
 
 void main() {
   const String TEST_MNEMONIC =
       'keep find oxygen first depend urge fix unit stairs miss danger transfer';
   group('test xrp address generate by', () {
     test(' mnemonic 12', () async {
-      final String address = await xrp.mnemonicToAddress(TEST_MNEMONIC);
+      final String address = await Xrp.mnemonicToAddress(TEST_MNEMONIC);
       expect(address, 'rJKQz9LY8BaNeeYBR4gKt1m8knzgNU97eb');
     });
   });
 
   group('test mnemonic to privateKey', () {
     test(' mnemonic 12', () async {
-      final privateKey = await xrp.mnemonicToPrivateKey(TEST_MNEMONIC);
+      final privateKey = await Xrp.mnemonicToPrivateKey(TEST_MNEMONIC);
       expect(privateKey,
           '3ed3297891ccade7fc53babb4783de5c079f68b41e2b3ef6b4ff3c8751e6be75');
     });
@@ -32,21 +32,21 @@ void main() {
     test(' signature xrp transaction', () async {
       final txJson = transactionJson['payment_xrp'];
       final txResult = txJson['txSignature'];
-      final signedMessage = xrp.sign(privateKey, txJson);
+      final signedMessage = Xrp.sign(privateKey, txJson);
       expect(signedMessage, txResult);
     });
 
     test(' signature token transaction', () async {
       final txJson = transactionJson['payment_token'];
       final txResult = txJson['txSignature'];
-      final signedMessage = xrp.sign(privateKey, txJson);
+      final signedMessage = Xrp.sign(privateKey, txJson);
       expect(signedMessage, txResult);
     });
 
     test(' signature trust set transaction', () async {
       final txJson = transactionJson['trust_set'];
       final txResult = txJson['txSignature'];
-      final signedMessage = xrp.sign(privateKey, txJson);
+      final signedMessage = Xrp.sign(privateKey, txJson);
       expect(signedMessage, txResult);
     });
   });
