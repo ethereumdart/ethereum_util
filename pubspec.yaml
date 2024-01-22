@@ -16,6 +16,8 @@ dependencies:
   ed25519_hd_key: ^2.2.1
   xrp_dart: ^3.0.1
   bip32: ^2.0.0
+  sr25519: ^0.1.0
+  ss58: ^1.1.2
 
 dev_dependencies:
   path: ^1.6.2
