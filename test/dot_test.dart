@@ -13,13 +13,13 @@ void main() {
   test(' dot demo', () async {
     /// address generate, default prefix 0;
     final address = await Dot.mnemonicToAddress(TEST_MNEMONIC);
-    expect(address, '15rRgsWxz4H5LTnNGcCFsszfXD8oeAFd8QRsR6MbQE2f6XFF');
+    expect(address, '12BEGDJA1T4UxkPBUGTAvTy1FsVd6Q2NtndEB5Y7CoPKUfLh');
 
     /// sign message
     final privateKey = hex.decode(
-        'c8fa03532fb22ee1f7f6908b9c02b4e72483f0dbd66e4cd456b8f34c6230b849');
+        'c5df21329fd21bdb4c07093964d78e26aebbd5bc8bf8560dbe3513c4e497ef8b');
     final publicKey = hex.decode(
-        'd6a3105d6768e956e9e5d41050ac29843f98561410d3a47f9dd5b3b227ab8746');
+        '3409551163fe49e947748bef3db9e6b2eb4b69d583f0b1b506a6c8b627c5086a');
     /// without 0x9c
     final message =
         '0500009ea0acfa4a4b5a19c512df75afc9b1d5a9e1a1acf872018f956c8526e11efa00028907003500140041420f001800000091b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3bd44f5a7b303737a78347cc54297aec16442b91f9db5f074027d152ac4d80c68';
@@ -35,18 +35,18 @@ void main() {
       final Uint8List privateKey =
           await Dot.mnemonicToPrivateKey(TEST_MNEMONIC);
       expect(hex.encode(privateKey),
-          'c8fa03532fb22ee1f7f6908b9c02b4e72483f0dbd66e4cd456b8f34c6230b849');
+          'c5df21329fd21bdb4c07093964d78e26aebbd5bc8bf8560dbe3513c4e497ef8b');
       final publicKey = Dot.privateKeyToPublicKey(privateKey);
       expect(hex.encode(publicKey),
-          'd6a3105d6768e956e9e5d41050ac29843f98561410d3a47f9dd5b3b227ab8746');
+          '3409551163fe49e947748bef3db9e6b2eb4b69d583f0b1b506a6c8b627c5086a');
       String address = Dot.publicKeyToAddress(publicKey, prefix: 42);
-      expect(address, '5Gv8YYFu8H1btvmrJy9FjjAWfb99wrhV3uhPFoNEr918utyR');
+      expect(address, '5DEw7t369fo1XDNfWdQAnK8rQFVyQ6UEpHtk1nYkeiMoJGym');
       address = Dot.publicKeyToAddress(publicKey, prefix: 0); // 默认地址
-      expect(address, '15rRgsWxz4H5LTnNGcCFsszfXD8oeAFd8QRsR6MbQE2f6XFF');
+      expect(address, '12BEGDJA1T4UxkPBUGTAvTy1FsVd6Q2NtndEB5Y7CoPKUfLh');
       address = Dot.publicKeyToAddress(publicKey, prefix: 2);
-      expect(address, 'HRkCrbmke2XeabJ5fxJdgXWpBRPkXWfWHY8eTeCKwDdf4k6');
+      expect(address, 'DkYnCNxn2owGsC7HLDDgGVrYqnDCmHRGfjVQSpi8WaJ3JpG');
       address = await Dot.mnemonicToAddress(TEST_MNEMONIC);
-      expect(address, '15rRgsWxz4H5LTnNGcCFsszfXD8oeAFd8QRsR6MbQE2f6XFF');
+      expect(address, '12BEGDJA1T4UxkPBUGTAvTy1FsVd6Q2NtndEB5Y7CoPKUfLh');
     });
   });
 
