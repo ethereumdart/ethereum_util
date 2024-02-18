@@ -2,19 +2,15 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
-import 'package:bip39/bip39.dart' as bip39;
-import "package:ed25519_hd_key/ed25519_hd_key.dart";
+import 'package:substrate_bip39/substrate_bip39.dart';
 import 'package:ss58/ss58.dart';
 import 'package:sr25519/sr25519.dart';
-
-final DOT_PATH = "m/44'/354'/0'/0'/0'";
 
 class Dot {
   /// Generates Sui seed by mnemonic
   static Future<Uint8List> mnemonicToPrivateKey(String mnemonic) async {
-    final seed = bip39.mnemonicToSeed(mnemonic);
-    final keyData = await ED25519_HD_KEY.derivePath(DOT_PATH, seed);
-    return Uint8List.fromList(keyData.key);
+    final seed = await SubstrateBip39.ed25519.seedFromUri(mnemonic);
+    return Uint8List.fromList(seed);
   }
 
   /// get all address
