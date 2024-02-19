@@ -11,7 +11,7 @@ const SUI_PATH = "m/44'/784'/0'/0'/0'";
 class SuiCoin {
   /// Generates Sui seed by mnemonic
   static Future<Uint8List> mnemonicToPrivateKey(String mnemonic) async {
-    final seed = mnemonicToSeed(mnemonic);
+    final seed = Crypto.mnemonicToSeed(mnemonic);
     final keyData = await ED25519_HD_KEY.derivePath(SUI_PATH, seed);
     return Uint8List.fromList(keyData.key);
   }

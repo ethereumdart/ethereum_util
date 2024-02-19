@@ -14,7 +14,7 @@ const HARDENED_OFFSET = 0x80000000;
 
 class Dot {
   static Future<Uint8List> mnemonicToPrivateKey(String mnemonic) async {
-    final seed = mnemonicToSeed(mnemonic);
+    final seed = Crypto.mnemonicToSeed(mnemonic);
     final result = ledgerMaster(seed);
     return Uint8List.fromList(result.sublist(0, 32));
   }

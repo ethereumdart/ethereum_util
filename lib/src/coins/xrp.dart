@@ -1,61 +1,111 @@
 import 'package:xrp_dart/xrp_dart.dart';
-import 'package:bip39/bip39.dart' as bip39;
-import 'package:bip32/bip32.dart' as bip32;
-import 'package:convert/convert.dart' show hex;
+
+import 'package:ethereum_util/src/coins/utils/crypto.dart';
 
 /// Generates Sui seed by mnemonic
 const XRP_PATH = "m/44'/144'/0'/0/0";
 
-class Xrp {
+class XrpCoin {
   static mnemonicToAddress(String mnemonic) {
-    final wallet = mnemonicToWallet(mnemonic);
-    final publicKey = wallet.getPublic();
-    final addressClass = publicKey.toAddress();
-    return addressClass.toString();
+    final privateKey = mnemonicToPrivateKey(mnemonic);
+    final wallet = privateKeyToWallet(privateKey);
+    return wallet.getPublic().toAddress().toString();
   }
 
   static String mnemonicToPrivateKey(String mnemonic) {
-    final seed = bip39.mnemonicToSeed(mnemonic);
-    final keyChain = bip32.BIP32.fromSeed(seed);
-    final keyPair = keyChain.derivePath(XRP_PATH);
-    return hex.encode(keyPair.privateKey!);
+    return Crypto.bip32DerivePath(mnemonic, XRP_PATH, returnStr: true);
   }
 
-  static XRPPrivateKey mnemonicToWallet(String mnemonic) {
-    final toHex = mnemonicToPrivateKey(mnemonic);
-    final wallet = XRPPrivateKey.fromHex('00' + toHex);
-    return wallet;
+  static String privateKeyToPublicKey(String privateKey) {
+    final wallet = privateKeyToWallet(privateKey);
+    return wallet.getPublic().toHex();
   }
 
-  static XRPTransaction createTransaction(
-      Map<String, Object?> originalTx, String publicKey) {
-    final Map<String, dynamic> txData = {
-      ...originalTx,
-      "SigningPubKey": publicKey
-    };
-    final tx = XRPTransaction.fromXrpl(txData);
-    return tx;
-  }
-
-  static String sign(String privateKey, Map<String, Object?> originalTx) {
+  static XRPPrivateKey privateKeyToWallet(String privateKey) {
     var key = privateKey;
     final keyPrefix = privateKey.substring(0, 2);
     if (keyPrefix != '00') key = '00' + key; // 处理私钥
-    final wallet = XRPPrivateKey.fromHex(key);
-    final pubKey = wallet.getPublic().toHex();
-    final tx = createTransaction(originalTx, pubKey); // 创建交易
+    return XRPPrivateKey.fromHex(key);
+  }
 
+  static String sign(String privateKey, XrpTxData txData) {
+    final wallet = privateKeyToWallet(privateKey);
+    final tx = XRPTransaction.fromXrpl(txData.toJson());
     final signed = wallet.sign(tx.toBlob()); // 签名
     tx.txnSignature = signed; // 加入
     return tx.toBlob(forSigning: false);
   }
 }
-// String camelToSnake(String input) {
-//   String result = input.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) {
-//     return '_' + match.group(1)!.toLowerCase();
-//   });
-//   if (result.startsWith('_')) {
-//     return result.replaceFirst('_', '');
-//   }
-//   return result;
-// }
+
+class XrpTxData {
+  XrpTxData({
+    required this.account,
+    required this.transactionType,
+    this.destination,
+    this.amount,
+    this.limitAmount,
+    this.flags = 0,
+    required this.sequence,
+    required this.fee,
+    required this.lastLedgerSequence,
+    required this.signingPubKey,
+  });
+  final String account;
+  final String transactionType;
+  final String? destination;
+  final dynamic amount;
+  final XrpTokenAmount? limitAmount;
+  final int flags;
+  final int sequence;
+  final String fee;
+  final int lastLedgerSequence;
+  final String signingPubKey;
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {
+      "Account": this.account,
+      "TransactionType": this.transactionType,
+      "Flags": this.flags,
+      "Sequence": this.sequence,
+      "Fee": this.fee,
+      "LastLedgerSequence": this.lastLedgerSequence,
+      "SigningPubKey": this.signingPubKey
+    };
+    switch (this.transactionType) {
+      case XrpTransactionType.payment:
+        json = {...json, "Destination": this.destination};
+        if (amount is String) {
+          return {...json, "Amount": this.amount};
+        } else if (amount is XrpTokenAmount) {
+          return {...json, "Amount": this.amount.toJson()};
+        } else {
+          throw Exception('unsupported amount format');
+        }
+      case XrpTransactionType.trustSet:
+        return {...json, "LimitAmount": this.limitAmount!.toJson()};
+      default:
+        throw Exception('unsupported transaction type');
+    }
+  }
+}
+
+class XrpTokenAmount {
+  XrpTokenAmount(
+      {required this.currency, required this.issuer, required this.value});
+  final String currency;
+  final String issuer;
+  final String value;
+
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> json = {
+      "currency": this.currency,
+      "issuer": this.issuer,
+      "value": this.value
+    };
+    return json;
+  }
+}
+
+class XrpTransactionType {
+  static const String payment = "Payment";
+  static const String trustSet = "TrustSet";
+}
