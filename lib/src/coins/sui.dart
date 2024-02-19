@@ -1,77 +1,73 @@
-import 'package:bip39/bip39.dart' as bip39;
 import "package:ed25519_hd_key/ed25519_hd_key.dart";
 import 'package:pointycastle/digests/blake2b.dart';
 import 'package:pinenacl/ed25519.dart';
 import 'package:convert/convert.dart' show hex;
 
+import 'package:ethereum_util/src/coins/utils/crypto.dart';
+
 const SUI_ADDRESS_LENGTH = 32;
+const SUI_PATH = "m/44'/784'/0'/0'/0'";
 
-/// Generates Sui seed by mnemonic
-Future<Uint8List> mnemonicToSuiSeedByte(String mnemonic) async {
-  final seed = bip39.mnemonicToSeed(mnemonic);
-  final path = "m/44'/784'/0'/0'/0'";
-  final seedNum = await ED25519_HD_KEY.derivePath(path, seed);
-  return Uint8List.fromList(seedNum.key);
-}
-
-/// Generates new Pair key by privateKey
-SigningKey generateNewPairKeyBySeed(Uint8List privateKey) {
-  return SigningKey.fromSeed(privateKey);
-}
-
-/// Generates new Pair key by mnemonic
-Future<SigningKey> generateSuiPairKey(String mnemonic) async {
-  final seed = await mnemonicToSuiSeedByte(mnemonic);
-  return generateNewPairKeyBySeed(seed);
-}
-
-/// Constructs public key to Black2bHash
-String publicKeyToBlack2bHash(AsymmetricPublicKey publicKey) {
-  final suiBytes = new Uint8List(publicKey.length + 1);
-  suiBytes[0] = 0;
-  suiBytes.setRange(1, suiBytes.length, publicKey);
-  final digest = Blake2bDigest(digestSize: 32);
-  digest.update(suiBytes, 0, suiBytes.length);
-  final hash = Uint8List(digest.digestSize);
-  digest.doFinal(hash, 0);
-  final hexes =
-      List<String>.generate(256, (i) => i.toRadixString(16).padLeft(2, '0'));
-  String _hex = '';
-  for (int i = 0; i < hash.length; i++) {
-    _hex += hexes[hash[i]];
+class SuiCoin {
+  /// Generates Sui seed by mnemonic
+  static Future<Uint8List> mnemonicToPrivateKey(String mnemonic) async {
+    final seed = mnemonicToSeed(mnemonic);
+    final keyData = await ED25519_HD_KEY.derivePath(SUI_PATH, seed);
+    return Uint8List.fromList(keyData.key);
   }
-  return _hex;
-}
 
-/// Constructs the Sui address associated with given public key
-String publicKeyToSuiAddress(AsymmetricPublicKey publicKey) {
-  final hash = publicKeyToBlack2bHash(publicKey);
-  final slicedHash = hash.substring(0, SUI_ADDRESS_LENGTH * 2);
-  return '0x${slicedHash.toLowerCase().padLeft(SUI_ADDRESS_LENGTH * 2, '0')}';
-}
+  /// Generates new Pair key by mnemonic
+  static Uint8List privateKeyToPublicKey(Uint8List privateKey) {
+    return ED25519.privateKeyToPublicKey(privateKey);
+  }
 
-/// Generates the sui address associated with mnemonic
-Future<String> mnemonicToSuiAddress(String mnemonic) async {
-  final signature = await generateSuiPairKey(mnemonic);
-  return publicKeyToSuiAddress(signature.publicKey);
-}
+  /// Constructs public key to Black2bHash
+  static String publicKeyToBlack2bHash(Uint8List publicKey) {
+    final suiBytes = new Uint8List(publicKey.length + 1);
+    suiBytes[0] = 0;
+    suiBytes.setRange(1, suiBytes.length, publicKey);
+    final digest = Blake2bDigest(digestSize: 32);
+    digest.update(suiBytes, 0, suiBytes.length);
+    final hash = Uint8List(digest.digestSize);
+    digest.doFinal(hash, 0);
+    final hexes =
+        List<String>.generate(256, (i) => i.toRadixString(16).padLeft(2, '0'));
+    String _hex = '';
+    for (int i = 0; i < hash.length; i++) {
+      _hex += hexes[hash[i]];
+    }
+    return _hex;
+  }
 
-/// pure Ed25519 signature
-String suiSignatureFromSeed(Uint8List message, Uint8List privateKey) {
-  SigningKey signingKey = generateNewPairKeyBySeed(privateKey);
-  SignedMessage signedMessage = signingKey.sign(message);
-  return hex.encode(signedMessage.signature);
-}
+  /// Constructs the Sui address associated with given public key
+  static String publicKeyToAddress(Uint8List publicKey) {
+    final hash = publicKeyToBlack2bHash(publicKey);
+    final slicedHash = hash.substring(0, SUI_ADDRESS_LENGTH * 2);
+    return '0x${slicedHash.toLowerCase().padLeft(SUI_ADDRESS_LENGTH * 2, '0')}';
+  }
 
-SignedMessage suiSignatureFromSeedReturnRaw(
-    Uint8List message, Uint8List privateKey) {
-  SigningKey signingKey = generateNewPairKeyBySeed(privateKey);
-  return signingKey.sign(message);
-}
+  /// Generates the sui address associated with mnemonic
+  static Future<String> mnemonicToAddress(String mnemonic) async {
+    final privateKey = await mnemonicToPrivateKey(mnemonic);
+    final publicKey = privateKeyToPublicKey(privateKey);
+    return publicKeyToAddress(publicKey);
+  }
 
-bool suiVerifySignedMessage(Uint8List publicKey, SignedMessage signedMessage) {
-  VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
-  return verifyKey.verify(
-      signature: signedMessage.signature,
-      message: Uint8List.fromList(signedMessage.message));
+  /// pure Ed25519 signature
+  static String sign(Uint8List message, Uint8List privateKey) {
+    final signedMessage = ED25519.sign(privateKey, message);
+    return hex.encode(signedMessage);
+  }
+
+  static SignedMessage signReturnRaw(Uint8List message, Uint8List privateKey) {
+    SigningKey signingKey = ED25519.generateKeyPair(privateKey);
+    return signingKey.sign(message);
+  }
+
+  static bool verify(Uint8List publicKey, SignedMessage signedMessage) {
+    VerifyKey verifyKey = new VerifyKey(Uint8List.fromList(publicKey));
+    return verifyKey.verify(
+        signature: signedMessage.signature,
+        message: Uint8List.fromList(signedMessage.message));
+  }
 }

@@ -30,6 +30,10 @@ Uint8List dynamicToUint8List(dynamic value) {
 }
 
 class ED25519 {
+  static SigningKey generateKeyPair(Uint8List privateKey) {
+    return SigningKey.fromSeed(privateKey);
+  }
+
   static Uint8List privateKeyToPublicKey(Uint8List privateKey) {
     SigningKey keyPair = SigningKey.fromSeed(privateKey);
     return Uint8List.fromList(keyPair.publicKey);
