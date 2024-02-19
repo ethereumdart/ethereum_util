@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:pinenacl/ed25519.dart';
 import 'package:convert/convert.dart' show hex;
 
-import 'package:ethereum_util/src/sui.dart' as sui;
+import 'package:ethereum_util/src/coins/sui.dart' as sui;
 
 void main() {
   const String TEST_MNEMONIC =
