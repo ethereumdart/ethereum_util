@@ -14,7 +14,7 @@ class Crypto {
     final keyChain = bip32.BIP32.fromSeed(seed);
     final keyPair = keyChain.derivePath(path);
     if (returnStr) {
-      return listToHex(keyPair.privateKey!);
+      return dynamicToHex(keyPair.privateKey!);
     } else {
       return dynamicToUint8List(keyPair.privateKey!);
     }
@@ -54,21 +54,27 @@ class ED25519 {
 }
 
 Uint8List dynamicToUint8List(dynamic value) {
-  if (value is String) {
-    return Uint8List.fromList(hex.decode(value));
-  } else if (value is Uint8List) {
-    return value;
-  } else {
-    throw Exception("value must be String or Uint8List");
+  switch (value.runtimeType.toString()) {
+    case 'List<int>':
+      return Uint8List.fromList(value);
+    case 'String':
+      return Uint8List.fromList(hex.decode(value));
+    case 'Uint8List':
+      return value;
+    default:
+      throw Exception("value must be String, List<int> or Uint8List");
   }
 }
 
-String listToHex(dynamic value) {
-  if (value is List<int>) {
-    return hex.encode(dynamicToUint8List(value));
-  } else if (value is Uint8List) {
-    return hex.encode(value);
-  } else {
-    throw Exception("value must be list<int> or Uint8List");
+String dynamicToHex(dynamic value) {
+  switch (value.runtimeType.toString()) {
+    case 'List<int>':
+      return hex.encode(dynamicToUint8List(value));
+    case 'Uint8List':
+      return hex.encode(value);
+    case 'String':
+      return value;
+    default:
+      throw Exception("value must be String, List<int> or Uint8List");
   }
 }
