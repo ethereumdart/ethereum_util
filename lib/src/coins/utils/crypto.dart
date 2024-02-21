@@ -2,29 +2,26 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:bip32/bip32.dart' as bip32;
 import 'package:convert/convert.dart' show hex;
 import 'package:pinenacl/ed25519.dart';
+import "package:ed25519_hd_key/ed25519_hd_key.dart";
 
 class Crypto {
   static Uint8List mnemonicToSeed(String mnemonic) {
     return bip39.mnemonicToSeed(mnemonic);
   }
 
-  static dynamic bip32DerivePath(String mnemonic, String path,
+  static Uint8List bip32DerivePath(String mnemonic, String path,
       {returnStr = false}) {
     final seed = mnemonicToSeed(mnemonic);
     final keyChain = bip32.BIP32.fromSeed(seed);
     final keyPair = keyChain.derivePath(path);
-    if (returnStr) {
-      return dynamicToHex(keyPair.privateKey!);
-    } else {
-      return dynamicToUint8List(keyPair.privateKey!);
-    }
+    return dynamicToUint8List(keyPair.privateKey!);
   }
 
-  // static Uint8List mnemonicToPrivateKey(String mnemonic, String path) {
-  //   final seed = mnemonicToSeed(mnemonic);
-  //   final privateKey = derivePath(seed, path);
-  //   return Uint8List.fromList(privateKey);
-  // }
+  static Future<Uint8List> bip44DerivePath(String mnemonic, String path) async {
+    final seed = mnemonicToSeed(mnemonic);
+    final keyData = await ED25519_HD_KEY.derivePath(path, seed);
+    return Uint8List.fromList(keyData.key);
+  }
 }
 
 class ED25519 {

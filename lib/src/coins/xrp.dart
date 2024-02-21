@@ -13,7 +13,8 @@ class XrpCoin {
   }
 
   static String mnemonicToPrivateKey(String mnemonic) {
-    return Crypto.bip32DerivePath(mnemonic, XRP_PATH, returnStr: true);
+    final privateKey = Crypto.bip32DerivePath(mnemonic, XRP_PATH);
+    return dynamicToHex(privateKey);
   }
 
   static String privateKeyToPublicKey(String privateKey) {

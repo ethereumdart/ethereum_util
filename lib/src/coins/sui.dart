@@ -1,4 +1,3 @@
-import "package:ed25519_hd_key/ed25519_hd_key.dart";
 import 'package:pointycastle/digests/blake2b.dart';
 import 'package:pinenacl/ed25519.dart';
 import 'package:convert/convert.dart' show hex;
@@ -11,9 +10,8 @@ const SUI_PATH = "m/44'/784'/0'/0'/0'";
 class SuiCoin {
   /// Generates Sui seed by mnemonic
   static Future<Uint8List> mnemonicToPrivateKey(String mnemonic) async {
-    final seed = Crypto.mnemonicToSeed(mnemonic);
-    final keyData = await ED25519_HD_KEY.derivePath(SUI_PATH, seed);
-    return Uint8List.fromList(keyData.key);
+    final privateKey = await Crypto.bip44DerivePath(mnemonic, SUI_PATH);
+    return Uint8List.fromList(privateKey);
   }
 
   /// Generates new Pair key by mnemonic
