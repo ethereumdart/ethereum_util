@@ -23,6 +23,7 @@ final BigInt _halfCurveOrder = params.n ~/ BigInt.two;
 const int _shaBytes = 256 ~/ 8;
 final SHA3Digest sha3digest = SHA3Digest(_shaBytes * 8);
 
+
 /// Signatures used to sign Ethereum transactions and messages.
 class ECDSASignature {
   final BigInt r;
@@ -30,6 +31,9 @@ class ECDSASignature {
   final int v;
 
   ECDSASignature(this.r, this.s, this.v);
+
+  @override
+  List<Object> get props => [r, s, v];
 }
 
 Uint8List sha3(Uint8List input) {
