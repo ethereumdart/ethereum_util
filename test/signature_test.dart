@@ -1,10 +1,12 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart' show hex;
-import 'package:ethereum_util/src/bigint.dart';
-import 'package:ethereum_util/src/bytes.dart';
-import 'package:ethereum_util/src/signature.dart' as signature;
 import 'package:test/test.dart';
+
+import 'package:ethereum_util/src/utils/bigint.dart';
+import 'package:ethereum_util/src/utils/bytes.dart';
+import 'package:ethereum_util/src/signature.dart' as signature;
 
 var echash = hex
     .decode('82ff40c0a986c6a5cfad4ddf4c3aa6996f1a7837f9c398e17e5de5cbd5a12b28');
@@ -15,7 +17,8 @@ var ropstenChainId = 3; // ropsten
 void main() {
   group('sign', () {
     test('should produce a signature', () {
-      var sig = signature.sign(echash, ecprivkey);
+      var sig = signature.sign(
+          Uint8List.fromList(echash), Uint8List.fromList(ecprivkey));
       expect(
           encodeBigInt(sig.r),
           hex.decode(
@@ -28,7 +31,9 @@ void main() {
     });
 
     test('should produce a signature for Ropsten testnet', () {
-      var sig = signature.sign(echash, ecprivkey, chainId: ropstenChainId);
+      var sig = signature.sign(
+          Uint8List.fromList(echash), Uint8List.fromList(ecprivkey),
+          chainId: ropstenChainId);
       expect(
           encodeBigInt(sig.r),
           hex.decode(
@@ -48,9 +53,10 @@ void main() {
       var s = decodeBigInt(hex.decode(
           '129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 27;
-      var pubkey = signature.recoverPublicKeyFromSignature(
-          signature.ECDSASignature(r, s, v), echash);
-      expect(pubkey, signature.privateKeyToPublicKey(ecprivkey));
+      var pubKey = signature.recoverPublicKeyFromSignature(
+          signature.ECDSASignature(r, s, v), Uint8List.fromList(echash));
+      expect(pubKey,
+          signature.privateKeyToPublicKey(Uint8List.fromList(ecprivkey)));
     });
 
     test('should recover a public key (ropstenChainId = 3)', () {
@@ -59,10 +65,11 @@ void main() {
       var s = decodeBigInt(hex.decode(
           '129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca66'));
       var v = 41;
-      var pubkey = signature.recoverPublicKeyFromSignature(
-          signature.ECDSASignature(r, s, v), echash,
+      var pubKey = signature.recoverPublicKeyFromSignature(
+          signature.ECDSASignature(r, s, v), Uint8List.fromList(echash),
           chainId: ropstenChainId);
-      expect(pubkey, signature.privateKeyToPublicKey(ecprivkey));
+      expect(pubKey,
+          signature.privateKeyToPublicKey(Uint8List.fromList(ecprivkey)));
     });
 
     test('should fail on an invalid signature (v = 21)', () {
@@ -73,7 +80,7 @@ void main() {
       var v = 21;
       expect(
           () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(r, s, v), echash),
+              signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)),
           throwsArgumentError);
     });
 
@@ -85,7 +92,7 @@ void main() {
       var v = 29;
       expect(
           () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(r, s, v), echash),
+              signature.ECDSASignature(r, s, v), Uint8List.fromList(echash)),
           throwsArgumentError);
     });
 
@@ -97,7 +104,7 @@ void main() {
       var v = 27;
       expect(
           () => signature.recoverPublicKeyFromSignature(
-              signature.ECDSASignature(s, r, v), echash),
+              signature.ECDSASignature(s, r, v), Uint8List.fromList(echash)),
           throwsArgumentError);
     });
   });
@@ -197,13 +204,17 @@ void main() {
       expect(signature.toRpcSig(r, s, v),
           '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b');
       expect(
-          signature.fromRpcSig(
-              '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b'),
-          signature.ECDSASignature(r, s, v));
+          signature
+              .fromRpcSig(
+                  '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b')
+              .toString(),
+          signature.ECDSASignature(r, s, v).toString());
       expect(
-          signature.fromRpcSig(
-              '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca6600'),
-          signature.ECDSASignature(r, s, v));
+          signature
+              .fromRpcSig(
+                  '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca6600')
+              .toString(),
+          signature.ECDSASignature(r, s, v).toString());
     });
 
     test('should throw on invalid length', () {
@@ -227,6 +238,38 @@ void main() {
     test('should throw on invalid v value', () {
       const v = 1;
       expect(() => signature.toRpcSig(r, s, v), throwsArgumentError);
+    });
+  });
+
+  group('signature supplementary testing ', () {
+    test('sha3', () {
+      final result = signature.sha3(new Uint8List(32));
+      expect(result.length, 32);
+    });
+
+    var privateKey;
+    var publicKey;
+    var address;
+    test('generateNewPrivateKey', () {
+      final random = new Random();
+      final result = signature.generateNewPrivateKey(random);
+      privateKey = encodeBigInt(result!, length: 32);
+      expect(result, new BigInt.from(9223372036854775807));
+    });
+
+    test('privateKeyToPublicKey', () {
+      publicKey = signature.privateKeyToPublicKey(privateKey);
+      expect(publicKey.length, 64);
+    });
+
+    test('publicKeyToAddress', () {
+      address = signature.publicKeyToAddress(publicKey);
+      expect(address.length, 20);
+    });
+
+    test('privateKeyToAddress', () {
+      final result = signature.privateKeyToAddress(privateKey);
+      expect(result, address);
     });
   });
 }

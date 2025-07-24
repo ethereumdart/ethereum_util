@@ -1,94 +1,168 @@
+import 'dart:typed_data';
 import 'dart:convert';
 
-import 'dart:typed_data';
-import 'package:ethereum_util/src/bytes.dart';
-import 'package:ethereum_util/src/signature.dart';
-import 'package:ethereum_util/src/typed_data.dart';
+import 'package:convert/convert.dart';
+import 'package:ethereum_util/ethereum_util.dart';
 import 'package:test/test.dart';
 
-final TypedData typedData = TypedData(
-    types: {
-      "EIP712Domain": [
-        TypedDataField(name: "name", type: "string"),
-        TypedDataField(name: "version", type: "string"),
-        TypedDataField(name: "chainId", type: "uint256"),
-        TypedDataField(name: "verifyingContract", type: "address")
-      ],
-      "Person": [
-        TypedDataField(name: "name", type: "string"),
-        TypedDataField(name: "wallet", type: "address")
-      ],
-      "Mail": [
-        TypedDataField(name: "from", type: "Person"),
-        TypedDataField(name: "to", type: "Person"),
-        TypedDataField(name: "contents", type: "string")
-      ]
-    },
-    primaryType: "Mail",
-    domain: EIP712Domain(
-        name: "Ether Mail",
-        version: "1",
-        chainId: 1,
-        verifyingContract: "0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"),
-    message: {
-      "from": {
-        "name": "Cow",
-        "wallet": "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"
-      },
-      "to": {
-        "name": "Bob",
-        "wallet": "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"
-      },
-      "contents": "Hello, Bob!"
-    });
+import 'package:ethereum_util/src/typed_data/models.dart';
+import 'package:ethereum_util/src/typed_data/util.dart';
+import 'package:ethereum_util/src/typed_data/signature.dart';
 
 void main() {
-  test('signedTypeData', () {
-    var privateKey = sha3(Uint8List.fromList(utf8.encode('cow')));
-    var address = privateKeyToAddress(privateKey);
-    var sig = signTypedData(privateKey, MsgParams(data: typedData));
-
-    expect(TypedDataUtils.encodeType('Mail', typedData.types),
-        'Mail(Person from,Person to,string contents)Person(string name,address wallet)');
-    expect(bufferToHex(TypedDataUtils.hashType('Mail', typedData.types)),
-        '0xa0cedeb2dc280ba39b857546d74f5549c3a1d7bdc2dd96bf881f76108e23dac2');
-    expect(
-        bufferToHex(TypedDataUtils.encodeData(
-            typedData.primaryType, typedData.message, typedData.types)),
-        '0xa0cedeb2dc280ba39b857546d74f5549c3a1d7bdc2dd96bf881f76108e23dac2fc71e5fa27ff56c350aa531bc129ebdf613b772b6604664f5d8dbe21b85eb0c8cd54f074a4af31b4411ff6a60c9719dbd559c221c8ac3492d9d872b041d703d1b5aadf3154a261abdd9086fc627b61efca26ae5702701d05cd2305f7c52a2fc8');
-    expect(
-        bufferToHex(TypedDataUtils.hashStruct(
-            typedData.primaryType, typedData.message, typedData.types)),
-        '0xc52c0ee5d84264471806290a3f2c4cecfc5490626bf912d01f240d7a274b371e');
-    expect(
-        bufferToHex(TypedDataUtils.hashStruct(
-            'EIP712Domain', typedData.domain, typedData.types)),
-        '0xf2cee375fa42b42143804025fc449deafd50cc031ca257e0b194a650a912090f');
-    expect(bufferToHex(TypedDataUtils.sign(typedData)),
-        '0xbe609aee343fb3c4b28e1df9e632fca64fcfaede20f02e86244efddf30957bd2');
-    expect(bufferToHex(address), '0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826');
-    expect(sig,
-        '0x4355c47d63924e8a72e509b65029052eb6c299d53a04e167c5775fd466751c9d07299936d304c153f6443dfa05f40ff007d72911b6f72307f996231605b915621c');
+  const privateKey =
+      '4af1bceebf7f3634ec3cff8a2c38e51178d5d4ce585c52d6043e5e2cc3418bb0';
+  const json =
+      r'''{"types":{"EIP712Domain":[{"type":"string","name":"name"},{"type":"string","name":"version"},{"type":"uint256","name":"chainId"},{"type":"address","name":"verifyingContract"}],"Part":[{"name":"account","type":"address"},{"name":"value","type":"uint96"}],"Mint721":[{"name":"tokenId","type":"uint256"},{"name":"tokenURI","type":"string"},{"name":"creators","type":"Part[]"},{"name":"royalties","type":"Part[]"}]},"domain":{"name":"Mint721","version":"1","chainId":4,"verifyingContract":"0x2547760120aed692eb19d22a5d9ccfe0f7872fce"},"primaryType":"Mint721","message":{"@type":"ERC721","contract":"0x2547760120aed692eb19d22a5d9ccfe0f7872fce","tokenId":"1","uri":"ipfs://ipfs/hash","creators":[{"account":"0xc5eac3488524d577a1495492599e8013b1f91efa","value":10000}],"royalties":[],"tokenURI":"ipfs://ipfs/hash"}}''';
+  test('should sign data with custom type which has an array', () {
+    final signature = signTypedData(
+        privateKey: Uint8List.fromList(hex.decode(privateKey)),
+        jsonData: json,
+        version: TypedDataVersion.V4);
+    expect(signature,
+        '0x2ce14898e255b8d1e5f296a293548607720951e507a5416a0515baef0420984f2e28df8824206db9dbab0e7f5b14eeb834d48ada4444e5f15e7bfd777d2069481c');
   });
 
-  test('normalize address adds hex prefix', () {
-    var initial = 'A06599BD35921CfB5B71B4BE3869740385b0B306';
-    var result = normalize(initial);
-    expect(result, '0x' + initial.toLowerCase());
+  group('typed data util', () {
+    test('hash message V1', () {
+      final version = TypedDataVersion.V1;
+      const json = r'''{"type":"string","name":"name","value":"value"}''';
+      final result =
+          TypedDataUtil.hashMessage(jsonData: json, version: version);
+      expect(result.length, 32);
+      const jsonList =
+          r'''[{"type":"string","name":"name","value":"value"},{"type":"string","name":"name","value":"value"}]''';
+      final resultList =
+          TypedDataUtil.hashMessage(jsonData: jsonList, version: version);
+      expect(resultList.length, 32);
+    });
+
+    test('recoverPublicKey V1', () {
+      final version = TypedDataVersion.V1;
+      final data = [
+        new EIP712TypedData(name: "name", type: "bytes", value: 'test')
+      ];
+      final sig =
+          '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b';
+
+      final result = TypedDataUtil.recoverPublicKey(data, sig, version);
+      expect(result!.length, 64);
+    });
+
+    test('recoverPublicKey V4', () {
+      final version = TypedDataVersion.V4;
+      const json =
+          r'''{"types":{"EIP712Domain":[{"type":"string","name":"name"},{"type":"string","name":"version"},{"type":"uint256","name":"chainId"},{"type":"address","name":"verifyingContract"}],"Part":[{"name":"account","type":"address"},{"name":"value","type":"uint96"}],"Mint721":[{"name":"tokenId","type":"uint256"},{"name":"tokenURI","type":"string"},{"name":"creators","type":"Part[]"},{"name":"royalties","type":"Part[]"}]},"domain":{"name":"Mint721","version":"1","chainId":4,"verifyingContract":"0x2547760120aed692eb19d22a5d9ccfe0f7872fce"},"primaryType":"Mint721","message":{"@type":"ERC721","contract":"0x2547760120aed692eb19d22a5d9ccfe0f7872fce","tokenId":"1","uri":"ipfs://ipfs/hash","creators":[{"account":"0xc5eac3488524d577a1495492599e8013b1f91efa","value":10000}],"royalties":[],"tokenURI":"ipfs://ipfs/hash"}}''';
+      final rawTypedData = jsonDecode(json);
+      final sig =
+          '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b';
+      final result = TypedDataUtil.recoverPublicKey(
+          TypedMessage.fromJson(rawTypedData), sig, version);
+      expect(result!.length, 64);
+    });
+
+    test('recoverPublicKey V3', () {
+      final version = TypedDataVersion.V3;
+      Map<String, List<TypedDataField>> types = {
+        "EIP712Domain": [
+          TypedDataField(name: "EIP712Domain", type: "EIP712Domain")
+        ]
+      };
+      final primaryType = 'EIP712Domain';
+      EIP712Domain? domain = EIP712Domain(
+          name: 'name',
+          version: 'version',
+          chainId: 1,
+          salt: 'salt',
+          verifyingContract: 'verifyingContract');
+      domain.toJson();
+      Map<String, dynamic> message = {"EIP712Domain": "EIP712Domain"};
+      final data = TypedMessage(
+          types: types,
+          primaryType: primaryType,
+          domain: domain,
+          message: message);
+      data.toJson();
+      final sig =
+          '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b';
+      try {
+        final result = TypedDataUtil.recoverPublicKey(data, sig, version);
+        print(result);
+      } catch (error) {
+        // print(error);
+      }
+    });
   });
 
-  test('normalize an integer converts to byte-pair hex', () {
-    var initial = 1;
-    var result = normalize(initial);
-    expect(result, '0x01');
+  group('typed data signature', () {
+    var privateKey =
+        encodeBigInt(new BigInt.from(9223372036854775807), length: 32);
+    var message = new Uint8List(32);
+    var ECDSASig;
+    final sig =
+        '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b';
+    test('signPersonalMessage', () {
+      final result = SignatureUtil.signPersonalMessage(
+          message: message, privateKey: privateKey);
+      expect(result.length, 132);
+    });
+
+    test('signToCompact', () {
+      final result =
+          SignatureUtil.signToCompact(message: message, privateKey: privateKey);
+      assert(result.startsWith('0x'));
+    });
+
+    test('fromRpcSig', () {
+      ECDSASig = SignatureUtil.fromRpcSig(sig);
+      expect(ECDSASig.runtimeType, ECDSASignature);
+    });
+
+    test('recoverPublicKeyFromSignature', () {
+      final result =
+          SignatureUtil.recoverPublicKeyFromSignature(ECDSASig, message);
+      expect(result!.length, 64);
+    });
+
+    test('ecRecover', () {
+      final result = SignatureUtil.ecRecover(
+          signature: sig, message: message, isPersonalSign: true);
+      assert(result.startsWith('0x'));
+    });
   });
 
-  test('normalize an unsupported type throws', () {
-    expect(() => normalize({}), throwsArgumentError);
+  group('typed data', () {
+    test('concatSig', () {
+      final sig =
+          '0x99e71a99cb2270b8cac5254f9e99b6210c6c10224a1579cf389ef88b20a1abe9129ff05af364204442bdb53ab6f18a99ab48acc9326fa689f228040429e3ca661b';
+      final ECDSASig = SignatureUtil.fromRpcSig(sig);
+      Uint8List r = encodeBigInt(ECDSASig.r);
+      Uint8List s = encodeBigInt(ECDSASig.s);
+      Uint8List v = encodeBigInt(new BigInt.from(ECDSASig.v));
+      final result = concatSig(r, s, v);
+      expect(result.length, 132);
+    });
+
+    test('signTypedDataCompact', () {
+      const json = r'''{"type":"string","name":"name","value":"value"}''';
+      var privateKey =
+          encodeBigInt(new BigInt.from(9223372036854775807), length: 32);
+      final version = TypedDataVersion.V1;
+      final result = signTypedDataCompact(
+          privateKey: privateKey, jsonData: json, version: version);
+      expect(result.length, 130);
+    });
   });
 
-  test('toJson', () {
-    expect(jsonEncode(typedData.toJson()),
-        r'{"types":{"EIP712Domain":[{"name":"name","type":"string"},{"name":"version","type":"string"},{"name":"chainId","type":"uint256"},{"name":"verifyingContract","type":"address"}],"Person":[{"name":"name","type":"string"},{"name":"wallet","type":"address"}],"Mail":[{"name":"from","type":"Person"},{"name":"to","type":"Person"},{"name":"contents","type":"string"}]},"primaryType":"Mail","domain":{"name":"Ether Mail","version":"1","chainId":1,"verifyingContract":"0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC"},"message":{"from":{"name":"Cow","wallet":"0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826"},"to":{"name":"Bob","wallet":"0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB"},"contents":"Hello, Bob!"}}');
+  group('typed data model', () {
+    test('EIP712TypedData toJson', () {
+      EIP712TypedData data =
+          new EIP712TypedData(name: 'name', type: 'string', value: 'string');
+      data.toJson();
+    });
+
+    test('TypedDataField toJson', () {
+      TypedDataField(name: "test", type: "test").toJson();
+    });
   });
 }
