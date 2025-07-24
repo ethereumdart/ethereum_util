@@ -19,6 +19,9 @@ dependencies:
   bip32: ^2.0.0
   sr25519: ^0.1.0
   ss58: ^1.1.2
+  pinenacl: ^0.6.0
+  substrate_bip39: ^0.2.0
+  crypto: ^3.0.1
 
 dev_dependencies:
   path: ^1.6.2
