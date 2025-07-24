@@ -49,7 +49,7 @@ int getBinarySize(String str) {
 }
 
 /// Returns TRUE if the first specified array contains all elements from the second one. FALSE otherwise.
-bool arrayContainsArray(List superset, List subset, {bool some: false}) {
+bool arrayContainsArray(List superset, List subset, {bool some = false}) {
   ArgumentError.checkNotNull(superset);
   ArgumentError.checkNotNull(subset);
 

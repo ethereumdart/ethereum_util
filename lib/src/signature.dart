@@ -32,7 +32,6 @@ class ECDSASignature {
 
   ECDSASignature(this.r, this.s, this.v);
 
-  @override
   List<Object> get props => [r, s, v];
 }
 

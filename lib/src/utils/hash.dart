@@ -6,7 +6,7 @@ import 'package:ethereum_util/src/utils/bytes.dart' as bytes;
 import 'package:ethereum_util/src/rlp.dart' as Rlp;
 
 /// Creates Keccak hash of the input
-Uint8List keccak(dynamic a, {int bits: 256}) {
+Uint8List keccak(dynamic a, {int bits = 256}) {
   a = bytes.toBuffer(a);
   Digest sha3 = new Digest('Keccak/$bits');
   return sha3.process(a);
@@ -25,7 +25,7 @@ Uint8List sha256(dynamic a) {
 }
 
 /// Creates RIPEMD160 hash of the input.
-Uint8List ripemd160(dynamic a, {bool padded: false}) {
+Uint8List ripemd160(dynamic a, {bool padded = false}) {
   a = bytes.toBuffer(a);
   Digest rmd160 = new Digest('RIPEMD-160');
   var hash = rmd160.process(a);
