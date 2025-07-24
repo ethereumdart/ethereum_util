@@ -1,6 +1,6 @@
 name: ethereum_util
 description: a collection of utility functions for Ethereum
-version: 1.5.1
+version: 1.5.2
 homepage: https://github.com/ethereumdart/ethereum_util
 
 environment:
