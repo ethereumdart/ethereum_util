@@ -15,12 +15,12 @@ dependencies:
   json_annotation: ^4.0.0
   bip39: ^1.0.6
   ed25519_hd_key: ^2.2.1
-  xrp_dart: ^3.0.1
+  xrp_dart: ^4.0.0
   bip32: ^2.0.0
-  sr25519: ^0.1.0
+  sr25519: ^0.7.0
   ss58: ^1.1.2
   pinenacl: ^0.6.0
-  substrate_bip39: ^0.2.0
+  substrate_bip39: ^0.7.0
   crypto: ^3.0.1
 
 dev_dependencies:
